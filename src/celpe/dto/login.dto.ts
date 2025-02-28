@@ -1,8 +1,8 @@
 export interface LoginRequest {
     usuario: string,
     senha: string,
-    canalSolicitante: string,
-    recaptcha: string
+    canalSolicitante?: string,
+    recaptcha?: string
 }
 export interface LoginResponse {
     token: {
