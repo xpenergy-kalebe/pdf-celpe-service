@@ -7,7 +7,7 @@ export class LoginBot {
     async executeLogin(loginData: LoginRequest): Promise<LoginResponse> {
         const { usuario, senha } = loginData;
 
-        const browser = await puppeteer.launch({ 
+        const browser = await puppeteer.launch({
             headless: false, // Usar false para ver as ações na tela durante os testes
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
             defaultViewport: null,
@@ -21,7 +21,7 @@ export class LoginBot {
             });
 
             // 🎯 Simulação de comportamento humano:
-            
+
             // 1. Movimentos aleatórios do mouse:
             await page.mouse.move(100, 100, { steps: 10 });
             await page.mouse.move(200, 200, { steps: 15 });
@@ -31,12 +31,14 @@ export class LoginBot {
             await page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
 
             // 3. Atrasos aleatórios:
-            
-            await page.click('input:has-text("LOGIN")');
+            await page.waitForSelector('.btn-login.mat-button');
+            await page.click('.btn-login.mat-button');
 
             // Preenchendo os campos do formulário com digitação simulada:
-            await page.type('input[data-placeholder="CPF/CNPJ"]', usuario, { delay: 100 });
-            await page.type('input[data-placeholder="Senha"]', senha, { delay: 100 });
+            await page.waitForSelector('input[data-placeholder="CPF/CNPJ')
+            
+            await page.type('input[data-placeholder="CPF/CNPJ"]', usuario, { delay: 1 });
+            await page.type('input[data-placeholder="Senha"]', senha, { delay: 1 });
 
             await page.setRequestInterception(true);
 
@@ -47,11 +49,11 @@ export class LoginBot {
                 ),
                 page.click('button[title="Entrar"]'),
             ]);
-            
+
             // Tipando a resposta para o tipo esperado:
             const responseData: LoginResponse = await response.json();
             console.log('Dados da resposta:', responseData);
-            
+
             return responseData;
 
         } catch (error) {
