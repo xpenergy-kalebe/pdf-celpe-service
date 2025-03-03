@@ -13,8 +13,7 @@ export class ExecuteLoginUseCase {
         try {
             console.log('Executando o bot de login...');
             const loginResponse = await this.externalApiService.Login(loginData);
-
-            return loginResponse;
+            return loginResponse
 
         } catch (error) {
             console.error('Erro no processo de login:', error.message);

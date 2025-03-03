@@ -9,7 +9,7 @@ export class CelpeController {
     async login(@Body() loginData: LoginRequest): Promise<LoginResponse> {
         try {
             const response = await this.executeLoginUseCase.execute(loginData);
-            return response;
+            return response
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
