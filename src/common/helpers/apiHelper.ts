@@ -7,10 +7,27 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 export class ApiHelper {
     constructor(private readonly httpService: HttpService) {}
 
-    private async request<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    private async request<T>(
+        method: 'get' | 'post' | 'put' | 'delete', 
+        url: string, 
+        jwt: string, 
+        data?: any, 
+        config?: AxiosRequestConfig
+    ): Promise<T> {
         try {
+            const headers = {
+                Authorization: `Bearer ${jwt}`,
+                ...config?.headers, 
+            };
+
             const response: AxiosResponse<T> = await firstValueFrom(
-                this.httpService.request({ method, url, data, ...config })
+                this.httpService.request({
+                    method,
+                    url,
+                    data,
+                    headers,
+                    ...config
+                })
             );
             return response.data;
         } catch (error) {
@@ -22,19 +39,19 @@ export class ApiHelper {
         }
     }
 
-    async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-        return this.request<T>('get', url, undefined, config);
+    async get<T>(url: string, jwt: string, config?: AxiosRequestConfig): Promise<T> {
+        return this.request<T>('get', url, jwt, undefined, config);
     }
 
-    async post<T>(url: string, data: any, config?: AxiosRequestConfig): Promise<T> {
-        return this.request<T>('post', url, data, config);
+    async post<T>(url: string, jwt: string, data: any, config?: AxiosRequestConfig): Promise<T> {
+        return this.request<T>('post', url, jwt, data, config);
     }
 
-    async put<T>(url: string, data: any, config?: AxiosRequestConfig): Promise<T> {
-        return this.request<T>('put', url, data, config);
+    async put<T>(url: string, jwt: string, data: any, config?: AxiosRequestConfig): Promise<T> {
+        return this.request<T>('put', url, jwt, data, config);
     }
 
-    async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-        return this.request<T>('delete', url, undefined, config);
+    async delete<T>(url: string, jwt: string, config?: AxiosRequestConfig): Promise<T> {
+        return this.request<T>('delete', url, jwt, undefined, config);
     }
 }
