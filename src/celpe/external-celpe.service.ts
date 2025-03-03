@@ -23,4 +23,8 @@ export class ExternalApiService {
     const url = `${api}/multilogin/2.0.0/servicos/imoveis/ucs/${ucId}?usuario=WSO2_CONEXAO&canalSolicitante=AGP&distribuidora=CELPE&protocolo=123&tipoPerfil=1&opcaoSSOS=N`;
     return this.apiHelper.get<UcResponse>(url, jwt);
   }
+  async getUcProtocol(ucId: string, jwt: string,document:string): Promise<ProtocolResponse> {
+    const url = `${api}/protocolo/1.1.0/obterProtocolo?distribuidora=CELP&canalSolicitante=AGP&documento=${document}&codCliente=${ucId}&recaptchaAnl=true&regiao=NE`;
+    return this.apiHelper.get<ProtocolResponse>(url, jwt);
+  }
 }
