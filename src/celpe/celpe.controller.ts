@@ -3,17 +3,21 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  Param,
   Post,
 } from '@nestjs/common';
 import { ExecuteLoginUseCase } from './usecases/login.usecase';
 import { GetUcsUseCase } from './usecases/getUcs.usecase';
+import { GetUcUseCase } from './usecases/getUc.usecase';
 import { LoginRequest, LoginResponse } from './dto/login.dto';
-import { ucsResponse } from './dto/ucs.dto';
+import { UcResponse, ucsResponse } from './dto/ucs.dto';
 @Controller('celpe')
 export class CelpeController {
   constructor(
     private readonly executeLoginUseCase: ExecuteLoginUseCase,
     private readonly getUcsUseCase: GetUcsUseCase,
+    private readonly getUcUseCase: GetUcUseCase,
+
   ) {}
 
   @Post('login')
@@ -29,6 +33,15 @@ export class CelpeController {
   async getUcs(@Body() loginData: LoginRequest): Promise<ucsResponse | null> {
     try {
       const response = await this.getUcsUseCase.execute(loginData);
+      return response;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  @Post('unidade/:id')  
+  async getUc(@Param('id') id: string, @Body() loginData: LoginRequest): Promise<UcResponse | null> {
+    try {
+      const response = await this.getUcUseCase.execute(loginData, id); 
       return response;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

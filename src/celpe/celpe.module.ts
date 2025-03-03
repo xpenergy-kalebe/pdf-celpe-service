@@ -7,10 +7,11 @@ import { ExecuteLoginUseCase } from './usecases/login.usecase';
 import { CelpeController } from './celpe.controller';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
 import { GetUcsUseCase } from './usecases/getUcs.usecase';
+import { GetUcUseCase } from './usecases/getUc.usecase';
 
 @Module({
     imports: [HttpModule],
-    providers: [ExternalApiService, ApiHelper, PayloadHelper, ExecuteLoginUseCase, GetUcsUseCase,  LoginBot],
+    providers: [ExternalApiService, ApiHelper, PayloadHelper, ExecuteLoginUseCase, GetUcUseCase, GetUcsUseCase,  LoginBot],
     exports: [ExternalApiService, ExecuteLoginUseCase],
     controllers: [CelpeController], 
   })
