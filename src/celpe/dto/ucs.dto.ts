@@ -1,7 +1,7 @@
 
 
 interface Local {
-    endereco: string | null;
+    endereco: string;
     bairro: string | null;
     municipio: string | null;
     cep: string | null;
@@ -10,7 +10,7 @@ interface Local {
 
 interface UnidadeConsumidora {
     status: string | null;
-    uc: string | null;
+    uc: string;
     nomeCliente: string | null;
     instalacao: string | null;
     local: Local | null;

@@ -14,6 +14,7 @@ import { UcResponse, ucsResponse } from './dto/ucs.dto';
 import { invoicesResponse } from './dto/fatura.dto';
 import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
+import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
 @Controller('celpe')
 export class CelpeController {
   constructor(
@@ -22,7 +23,7 @@ export class CelpeController {
     private readonly getUcUseCase: GetUcUseCase,
     private readonly getProtocolUseCase: GetProtocolUseCase,
     private readonly getInvoicesUseCase: GetInvoicesUseCase,
-
+    private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
   ) {}
 
   @Post('login')
@@ -43,32 +44,51 @@ export class CelpeController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  @Post('unidade/:id')  
-  async getUc(@Param('id') id: string, @Body() loginData: LoginRequest): Promise<UcResponse | null> {
+  @Post('unidade/:id')
+  async getUc(
+    @Param('id') id: string,
+    @Body() loginData: LoginRequest,
+  ): Promise<UcResponse | null> {
     try {
-      const response = await this.getUcUseCase.execute(loginData, id); 
+      const response = await this.getUcUseCase.execute(loginData, id);
       return response;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  @Post('protocolo/:id')  
-  async getProtocol(@Param('id') id: string, @Body() loginData: LoginRequest): Promise<ProtocolResponse | null> {
+  @Post('protocolo/:id')
+  async getProtocol(
+    @Param('id') id: string,
+    @Body() loginData: LoginRequest,
+  ): Promise<ProtocolResponse | null> {
     try {
-      const response = await this.getProtocolUseCase.execute(loginData, id); 
+      const response = await this.getProtocolUseCase.execute(loginData, id);
       return response;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  @Post('faturas/:id')  
-  async getInvoices(@Param('id') id: string, @Body() loginData: LoginRequest): Promise<invoicesResponse | undefined> {
+  @Post('faturas/:id')
+  async getInvoices(
+    @Param('id') id: string,
+    @Body() loginData: LoginRequest,
+  ): Promise<invoicesResponse | undefined> {
     try {
-      const response = await this.getInvoicesUseCase.execute(loginData, id); 
+      const response = await this.getInvoicesUseCase.execute(loginData, id);
       return response;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  
+  @Post('download/:month')
+  async downloadPdfs(
+    @Param('month') month: string,
+    @Body() loginData: LoginRequest,
+  ): Promise<void> {
+    try {
+      await this.downloadPdfsUseCase.execute(loginData, Number(month));
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

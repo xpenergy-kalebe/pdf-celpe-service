@@ -9,14 +9,14 @@ interface Fatura {
     dataPagamento: string | null;
     dataVencimento: string | null;
     grupoTensao: string | null;
-    mesReferencia: string | null;
-    numeroFatura: string | null;
+    mesReferencia: string;
+    numeroFatura: string;
     origemFatura: string | null;
     situacaoComercial: string | null;
     tipoArrecadacao: string | null;
     tipoEntrega: string | null;
     tipoLeitura: string | null;
-    uc: string | null;
+    uc: string;
     valorEmissao: string | null;
     dataInicioPeriodo: string | null;
     dataFimPeriodo: string | null;
@@ -42,12 +42,12 @@ interface Fatura {
     dataVencimento: string | null;
     dataCorte: string | null;
   }
-export interface invoicesResponse {
+export interface retorno {
       e_resultado: string
 }
-  export interface Dados {
+  export interface invoicesResponse {
     entregaFaturas: EntregaFaturas;
-    retorno: Retorno;
+    retorno: retorno;
     faturas: Fatura[];
   }
   

@@ -1,5 +1,5 @@
 export interface Payload {
-    sub: string | null;
+    sub: string;
     aut: string | null;
     aud: string | null;
     nbf: number | null;

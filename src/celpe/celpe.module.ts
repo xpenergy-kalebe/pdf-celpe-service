@@ -10,6 +10,7 @@ import { GetUcsUseCase } from './usecases/getUcs.usecase';
 import { GetUcUseCase } from './usecases/getUc.usecase';
 import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
+import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
 @Module({
   imports: [HttpModule],
   providers: [
@@ -21,6 +22,7 @@ import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
     GetUcUseCase,
     GetUcsUseCase,
     GetInvoicesUseCase,
+    DownloadPdfsUseCase,
     LoginBot,
   ],
   exports: [ExternalApiService, ExecuteLoginUseCase],

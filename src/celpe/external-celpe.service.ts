@@ -4,6 +4,7 @@ import { LoginRequest, LoginResponse } from './dto/login.dto';
 import { UcResponse, ucsResponse } from './dto/ucs.dto';
 import { LoginBot } from './bot/loginbot';
 import { invoicesResponse } from './dto/fatura.dto';
+import { FileResponse } from './dto/file.dto';
 export const api = 'https://apineprd.neoenergia.com';
 
 @Injectable()
@@ -48,8 +49,8 @@ export class ExternalApiService {
     document: string,
     protocol: string,
     InvoiceId: string
-  ): Promise<invoicesResponse> {
+  ): Promise<FileResponse> {
     const url = `${api}/multilogin/2.0.0/servicos/faturas/${InvoiceId}/pdf?codigo=${ucId}&protocolo=${protocol}&tipificacao=1031607&usuario=WSO2_CONEXAO&canalSolicitante=AGP&motivo=10&distribuidora=CELPE&regiao=NE&tipoPerfil=1&documento=${document}&documentoSolicitante=${document}&byPassActiv=`;
-    return this.apiHelper.get<invoicesResponse>(url, jwt);
+    return this.apiHelper.get<FileResponse>(url, jwt);
   }
 }

@@ -11,7 +11,6 @@ export class ExecuteLoginUseCase {
     async execute(loginData: LoginRequest): Promise<LoginResponse> {
 
         try {
-            console.log('Executando o bot de login...');
             const loginResponse = await this.externalApiService.Login(loginData);
             return loginResponse
 

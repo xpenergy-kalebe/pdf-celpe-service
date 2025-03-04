@@ -23,7 +23,6 @@ export class LoginBot {
                 if (url.includes('autentica') && response.status() !== 204 && response.status() !== 304 && method !== 'OPTIONS') {
                     try {
                         const responseBody: LoginResponse = await response.json();
-                        console.log('Resposta da requisição autentica:', responseBody);
                         resolve(responseBody);
                     } catch (error) {
                         reject(new Error('Erro ao processar a resposta: ' + error.message));
