@@ -11,8 +11,9 @@ import { GetUcsUseCase } from './usecases/getUcs.usecase';
 import { GetUcUseCase } from './usecases/getUc.usecase';
 import { LoginRequest, LoginResponse } from './dto/login.dto';
 import { UcResponse, ucsResponse } from './dto/ucs.dto';
+import { invoicesResponse } from './dto/fatura.dto';
 import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
-
+import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
 @Controller('celpe')
 export class CelpeController {
   constructor(
@@ -20,6 +21,8 @@ export class CelpeController {
     private readonly getUcsUseCase: GetUcsUseCase,
     private readonly getUcUseCase: GetUcUseCase,
     private readonly getProtocolUseCase: GetProtocolUseCase,
+    private readonly getInvoicesUseCase: GetInvoicesUseCase,
+
   ) {}
 
   @Post('login')
@@ -58,4 +61,14 @@ export class CelpeController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+  @Post('faturas/:id')  
+  async getInvoices(@Param('id') id: string, @Body() loginData: LoginRequest): Promise<invoicesResponse | undefined> {
+    try {
+      const response = await this.getInvoicesUseCase.execute(loginData, id); 
+      return response;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
 }

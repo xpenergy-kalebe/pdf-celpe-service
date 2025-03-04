@@ -9,7 +9,7 @@ import { ExecuteLoginUseCase } from './usecases/login.usecase';
 import { GetUcsUseCase } from './usecases/getUcs.usecase';
 import { GetUcUseCase } from './usecases/getUc.usecase';
 import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
-
+import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
 @Module({
   imports: [HttpModule],
   providers: [
@@ -20,6 +20,7 @@ import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
     ExecuteLoginUseCase,
     GetUcUseCase,
     GetUcsUseCase,
+    GetInvoicesUseCase,
     LoginBot,
   ],
   exports: [ExternalApiService, ExecuteLoginUseCase],
