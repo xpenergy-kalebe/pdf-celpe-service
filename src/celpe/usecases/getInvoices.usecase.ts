@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { invoicesResponse } from '../dto/fatura.dto';
-import { ExternalApiService } from '../external-celpe.service';
+import { invoicesResponse } from '../external-services/dto/fatura.dto';
+import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
-import { LoginRequest } from '../dto/login.dto';
+import { LoginRequest } from '../external-services/dto/login.dto';
 @Injectable()
 export class GetInvoicesUseCase {
   constructor(

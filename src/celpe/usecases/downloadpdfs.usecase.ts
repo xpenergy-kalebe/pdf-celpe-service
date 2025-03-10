@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ExternalApiService } from '../external-celpe.service';
+import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
-import { LoginRequest } from '../dto/login.dto';
+import { LoginRequest } from '../external-services/dto/login.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -13,10 +13,7 @@ export class DownloadPdfsUseCase {
     private readonly login: ExecuteLoginUseCase,
   ) {}
 
-  async execute(
-    loginData: LoginRequest,
-    months: number,
-  ): Promise<void> {
+  async execute(loginData: LoginRequest, months: number): Promise<void> {
     console.log('Iniciando execução do DownloadPdfsUseCase...');
 
     let token;
@@ -63,7 +60,9 @@ export class DownloadPdfsUseCase {
                   token.token.ne,
                   payload.sub,
                 );
-                console.log(`Protocolo obtido para UC ${uc.uc}: ${protocol.protocoloSalesforce}`);
+                console.log(
+                  `Protocolo obtido para UC ${uc.uc}: ${protocol.protocoloSalesforce}`,
+                );
 
                 const invoices = await this.externalApiService.getInvoices(
                   uc.uc,
@@ -71,7 +70,9 @@ export class DownloadPdfsUseCase {
                   payload.sub,
                   String(protocol.protocoloSalesforce),
                 );
-                console.log(`Faturas encontradas para UC ${uc.uc}: ${invoices.faturas.length}`);
+                console.log(
+                  `Faturas encontradas para UC ${uc.uc}: ${invoices.faturas.length}`,
+                );
 
                 invoices.faturas.sort((a, b) =>
                   b.mesReferencia.localeCompare(a.mesReferencia),
@@ -83,26 +84,39 @@ export class DownloadPdfsUseCase {
                       `Baixando fatura: ${fatura.numeroFatura} - ${fatura.mesReferencia}`,
                     );
 
-                    const pdfResponse = await this.externalApiService.downloadPDFS(
-                      uc.uc,
-                      token.token.ne,
-                      payload.sub,
-                      String(protocol.protocoloSalesforce),
-                      fatura.numeroFatura,
-                    );
+                    const pdfResponse =
+                      await this.externalApiService.downloadPDFS(
+                        uc.uc,
+                        token.token.ne,
+                        payload.sub,
+                        String(protocol.protocoloSalesforce),
+                        fatura.numeroFatura,
+                      );
 
                     if (pdfResponse.fileData) {
-                      console.log(`Fatura ${fatura.numeroFatura} baixada com sucesso.`);
-                      this.savePdf(`${uc.uc} - ${uc.local?.endereco}`, fatura.mesReferencia, pdfResponse.fileData);
+                      console.log(
+                        `Fatura ${fatura.numeroFatura} baixada com sucesso.`,
+                      );
+                      this.savePdf(
+                        `${uc.uc} - ${uc.local?.endereco}`,
+                        fatura.mesReferencia,
+                        pdfResponse.fileData,
+                      );
                     } else {
-                      console.log(`Falha ao baixar fatura ${fatura.numeroFatura}: PDF não encontrado.`);
+                      console.log(
+                        `Falha ao baixar fatura ${fatura.numeroFatura}: PDF não encontrado.`,
+                      );
                     }
                   } catch (pdfError) {
-                    console.error(`Erro ao tentar baixar o PDF da fatura ${fatura.numeroFatura}: ${pdfError.message}`);
+                    console.error(
+                      `Erro ao tentar baixar o PDF da fatura ${fatura.numeroFatura}: ${pdfError.message}`,
+                    );
                   }
                 }
               } catch (protocolError) {
-                console.error(`Erro ao obter o protocolo para UC ${uc.uc}: ${protocolError.message}`);
+                console.error(
+                  `Erro ao obter o protocolo para UC ${uc.uc}: ${protocolError.message}`,
+                );
               }
             }
           }
@@ -119,12 +133,19 @@ export class DownloadPdfsUseCase {
 
   private savePdf(uc: string, fileName: string, fileData: string): void {
     console.log(`Salvando PDF para UC ${uc}: ${fileName}.pdf`);
-  
-    const directoryPath = path.join(__dirname, '..', '..', '..', 'downloaded_files', uc);
-  
+
+    const directoryPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'downloaded_files',
+      uc,
+    );
+
     const safeFileName = fileName.replace(/\//g, '-');
     const filePath = path.join(directoryPath, `${safeFileName}.pdf`);
-  
+
     try {
       if (!fs.existsSync(directoryPath)) {
         console.log(`Criando diretório: ${directoryPath}`);
@@ -135,7 +156,9 @@ export class DownloadPdfsUseCase {
       fs.writeFileSync(filePath, pdfBuffer);
       console.log(`Arquivo salvo com sucesso: ${filePath}`);
     } catch (error) {
-      console.error(`Erro ao salvar o arquivo ${fileName}.pdf: ${error.message}`);
+      console.error(
+        `Erro ao salvar o arquivo ${fileName}.pdf: ${error.message}`,
+      );
     }
   }
 }

@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ApiHelper } from 'src/common/helpers/apiHelper';
 import { LoginRequest, LoginResponse } from './dto/login.dto';
 import { UcResponse, ucsResponse } from './dto/ucs.dto';
-import { LoginBot } from './bot/loginbot';
+import { LoginBot } from '../bot/loginbot';
 import { invoicesResponse } from './dto/fatura.dto';
 import { FileResponse } from './dto/file.dto';
+import { PixRequest, PixResponse } from './dto/pix.dto';
 export const api = 'https://apineprd.neoenergia.com';
 
 @Injectable()
@@ -48,9 +49,14 @@ export class ExternalApiService {
     jwt: string,
     document: string,
     protocol: string,
-    InvoiceId: string
+    InvoiceId: string,
   ): Promise<FileResponse> {
     const url = `${api}/multilogin/2.0.0/servicos/faturas/${InvoiceId}/pdf?codigo=${ucId}&protocolo=${protocol}&tipificacao=1031607&usuario=WSO2_CONEXAO&canalSolicitante=AGP&motivo=10&distribuidora=CELPE&regiao=NE&tipoPerfil=1&documento=${document}&documentoSolicitante=${document}&byPassActiv=`;
     return this.apiHelper.get<FileResponse>(url, jwt);
+  }
+  async getPix(jwt: string, data: PixRequest): Promise<PixResponse> {
+    const url = `${api}/multilogin/2.0.0/servicos/pixne/gerarPix`;
+
+    return this.apiHelper.post<PixResponse>(url, jwt, data);
   }
 }

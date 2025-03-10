@@ -9,12 +9,14 @@ import {
 import { ExecuteLoginUseCase } from './usecases/login.usecase';
 import { GetUcsUseCase } from './usecases/getUcs.usecase';
 import { GetUcUseCase } from './usecases/getUc.usecase';
-import { LoginRequest, LoginResponse } from './dto/login.dto';
-import { UcResponse, ucsResponse } from './dto/ucs.dto';
-import { invoicesResponse } from './dto/fatura.dto';
+import { LoginRequest, LoginResponse } from './external-services/dto/login.dto';
+import { UcResponse, ucsResponse } from './external-services/dto/ucs.dto';
+import { invoicesResponse } from './external-services/dto/fatura.dto';
 import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
 import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
+import { GetUCPix } from './usecases/getUcPix.usecase';
+import { PixResponse } from './external-services/dto/pix.dto';
 @Controller('celpe')
 export class CelpeController {
   constructor(
@@ -24,6 +26,7 @@ export class CelpeController {
     private readonly getProtocolUseCase: GetProtocolUseCase,
     private readonly getInvoicesUseCase: GetInvoicesUseCase,
     private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
+    private readonly getUcPixUseCase: GetUCPix,
   ) {}
 
   @Post('login')
@@ -87,6 +90,17 @@ export class CelpeController {
   ): Promise<void> {
     try {
       await this.downloadPdfsUseCase.execute(loginData, Number(month));
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  @Post('pix/uc/:ucId')
+  async getPix(
+    @Param('ucId') ucId: string,
+    @Body() loginData: LoginRequest,
+  ): Promise<PixResponse> {
+    try {
+      return await this.getUcPixUseCase.execute(loginData, ucId);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
