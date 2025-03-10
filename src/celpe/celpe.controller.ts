@@ -16,7 +16,7 @@ import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
 import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
 import { GetUCPix } from './usecases/getUcPix.usecase';
-import { PixResponse } from './external-services/dto/pix.dto';
+import { Pix } from './dto/pix.dto';
 @Controller('celpe')
 export class CelpeController {
   constructor(
@@ -98,7 +98,7 @@ export class CelpeController {
   async getPix(
     @Param('ucId') ucId: string,
     @Body() loginData: LoginRequest,
-  ): Promise<PixResponse> {
+  ): Promise<Pix> {
     try {
       return await this.getUcPixUseCase.execute(loginData, ucId);
     } catch (error) {

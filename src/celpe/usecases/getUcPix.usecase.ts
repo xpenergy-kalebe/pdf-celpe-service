@@ -4,6 +4,7 @@ import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
 import { LoginRequest } from '../external-services/dto/login.dto';
 import { PixRequest, PixResponse } from '../external-services/dto/pix.dto';
+import { Pix } from '../dto/pix.dto';
 
 @Injectable()
 export class GetUCPix {
@@ -12,7 +13,7 @@ export class GetUCPix {
     private readonly login: ExecuteLoginUseCase,
   ) {}
 
-  async execute(loginData: LoginRequest, ucId: string): Promise<PixResponse> {
+  async execute(loginData: LoginRequest, ucId: string): Promise<Pix> {
     const token = await this.login.execute(loginData);
     if (!token) {
       throw new Error('Falha ao obter o token de autenticação');
@@ -60,7 +61,16 @@ export class GetUCPix {
           data,
         );
 
-        return getPix;
+        // console.log(`pix ${JSON.stringify(getPix)} from unity: ${uc.codigo}`);
+
+        const { copiaColaPix } = getPix.dadosFatura;
+
+        const response: Pix = {
+          copyAndPaste: copiaColaPix,
+          month: invoice.faturas[0].mesReferencia,
+        };
+
+        return response;
       } catch (error) {
         throw new Error('Falha');
       }
