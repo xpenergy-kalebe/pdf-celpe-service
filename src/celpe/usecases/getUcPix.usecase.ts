@@ -3,7 +3,7 @@ import { ExternalApiService } from '../external-services/external-celpe.service'
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
 import { LoginRequest } from '../external-services/dto/login.dto';
-import { PixRequest, PixResponse } from '../external-services/dto/pix.dto';
+import { PixRequest } from '../external-services/dto/pix.dto';
 import { Pix } from '../dto/pix.dto';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class GetUCPix {
   constructor(
     private readonly externalApiService: ExternalApiService,
     private readonly login: ExecuteLoginUseCase,
-  ) {}
+  ) { }
 
   async execute(loginData: LoginRequest, ucId: string): Promise<Pix> {
     const token = await this.login.execute(loginData);
@@ -60,8 +60,6 @@ export class GetUCPix {
           token.token.ne,
           data,
         );
-
-        // console.log(`pix ${JSON.stringify(getPix)} from unity: ${uc.codigo}`);
 
         const { copiaColaPix } = getPix.dadosFatura;
 

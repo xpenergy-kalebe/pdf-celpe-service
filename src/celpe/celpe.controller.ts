@@ -16,7 +16,9 @@ import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
 import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
 import { GetUCPix } from './usecases/getUcPix.usecase';
-import { Pix } from './dto/pix.dto';
+import { Pix, PixList } from './dto/pix.dto';
+import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
+
 @Controller('celpe')
 export class CelpeController {
   constructor(
@@ -27,6 +29,7 @@ export class CelpeController {
     private readonly getInvoicesUseCase: GetInvoicesUseCase,
     private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
     private readonly getUcPixUseCase: GetUCPix,
+    private readonly getAllPixUseCase: GetAllPixUseCase,
   ) {}
 
   @Post('login')
@@ -94,13 +97,25 @@ export class CelpeController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  @Post('pix/uc/:ucId')
-  async getPix(
-    @Param('ucId') ucId: string,
+
+  // @Post('pix/uc/:ucId')
+  // async getPix(
+  //   @Param('ucId') ucId: string,
+  //   @Body() loginData: LoginRequest,
+  // ): Promise<Pix> {
+  //   try {
+  //     return await this.getUcPixUseCase.execute(loginData, ucId);
+  //   } catch (error) {
+  //     throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+  //   }
+  // }
+
+  @Post('pix')
+  async getAllPix(
     @Body() loginData: LoginRequest,
-  ): Promise<Pix> {
+  ): Promise<PixList[]> {
     try {
-      return await this.getUcPixUseCase.execute(loginData, ucId);
+      return await this.getAllPixUseCase.execute(loginData);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

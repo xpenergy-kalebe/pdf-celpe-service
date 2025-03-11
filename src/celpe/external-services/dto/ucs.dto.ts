@@ -12,7 +12,7 @@ interface UnidadeConsumidora {
   nomeCliente: string | null;
   instalacao: string | null;
   local: Local | null;
-  contrato: string | null;
+  contrato: string;
   dt_inicio: string | null;
   dt_fim: string | null;
 }
@@ -25,7 +25,7 @@ interface Retorno {
 }
 
 export interface ucsResponse {
-  ucs: UnidadeConsumidora[] | null;
+  ucs: UnidadeConsumidora[];
   retorno: Retorno | null;
 }
 

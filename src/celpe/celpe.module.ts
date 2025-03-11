@@ -12,6 +12,7 @@ import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
 import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
 import { GetUCPix } from './usecases/getUcPix.usecase';
+import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
 @Module({
   imports: [HttpModule],
   providers: [
@@ -26,6 +27,7 @@ import { GetUCPix } from './usecases/getUcPix.usecase';
     DownloadPdfsUseCase,
     LoginBot,
     GetUCPix,
+    GetAllPixUseCase,
   ],
   exports: [ExternalApiService, ExecuteLoginUseCase],
   controllers: [CelpeController],
