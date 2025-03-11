@@ -8,7 +8,7 @@ import {
 @Injectable()
 export class LoginBot {
   async executeLogin(loginData: LoginRequest): Promise<LoginResponse> {
-    const { usuario, senha } = loginData;
+    const { username, password } = loginData;
 
     const browser = await puppeteer.launch({
       headless: false,
@@ -62,12 +62,12 @@ export class LoginBot {
       await this.typeWithDelay(
         page,
         'input[data-placeholder="CPF/CNPJ"]',
-        usuario,
+        username,
       );
       await this.randomDelay();
 
       await page.waitForSelector('input[data-placeholder="Senha"]');
-      await this.typeWithDelay(page, 'input[data-placeholder="Senha"]', senha);
+      await this.typeWithDelay(page, 'input[data-placeholder="Senha"]', password  );
       await this.randomDelay();
 
       await page.click('button[title="Entrar"]');

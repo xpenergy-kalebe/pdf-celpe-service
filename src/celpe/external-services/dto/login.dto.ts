@@ -1,6 +1,6 @@
 export interface LoginRequest {
-  usuario: string;
-  senha: string;
+  username: string;
+  password: string;
   canalSolicitante?: string;
   recaptcha?: string;
 }

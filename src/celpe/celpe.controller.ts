@@ -98,17 +98,17 @@ export class CelpeController {
     }
   }
 
-  // @Post('pix/uc/:ucId')
-  // async getPix(
-  //   @Param('ucId') ucId: string,
-  //   @Body() loginData: LoginRequest,
-  // ): Promise<Pix> {
-  //   try {
-  //     return await this.getUcPixUseCase.execute(loginData, ucId);
-  //   } catch (error) {
-  //     throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-  //   }
-  // }
+  @Post('pix/:ucId')
+  async getPix(
+    @Param('ucId') ucId: string,
+    @Body() loginData: LoginRequest,
+  ): Promise<Pix> {
+    try { 
+      return await this.getUcPixUseCase.execute(loginData, ucId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   @Post('pix')
   async getAllPix(
