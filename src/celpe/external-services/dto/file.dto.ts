@@ -1,8 +1,8 @@
 export interface FileResponse {
-  fileName: string | null;
-  fileSize: string | null;
-  fileData: string | null;
-  fileExtension: string | null;
+  fileName: string;
+  fileSize: string;
+  fileData: string;
+  fileExtension: string;
   retorno: ReturnData;
 }
 
