@@ -47,9 +47,9 @@ export class DownloadPdfsUseCase {
           token.token.ne,
         );
 
-        ucs.ucs = ucs.ucs.filter((uc) => {
-          return uc.status === "LIGADA"
-        })
+        // ucs.ucs = ucs.ucs.filter((uc) => {
+        //   return uc.status === "LIGADA"
+        // })
         
         if (ucs.ucs) {
           console.log(`Total de UCS encontradas: ${ucs.ucs.length}`);
