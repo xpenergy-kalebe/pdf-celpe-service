@@ -2,20 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
-import { LoginRequest } from '../external-services/dto/login.dto';
-import * as fs from 'fs';
-import * as path from 'path';
+import { LoginRequest, LoginResponse } from '../external-services/dto/login.dto';
+import { UcInvoice, Invoice } from '../dto/invoice.dto';
+
 
 @Injectable()
-export class DownloadPdfsUseCase {
+export class GetAllPdfsUseCase {
   constructor(
     private readonly externalApiService: ExternalApiService,
     private readonly login: ExecuteLoginUseCase,
-  ) { }
-  async execute(loginData: LoginRequest, months: number): Promise<void> {
-    console.log('Iniciando execução do DownloadPdfsUseCase...');
+  ) {}
 
-    let token;
+  async execute(loginData: LoginRequest, months: number): Promise<UcInvoice[]> {
+    console.log('Iniciando execução de faturas...');
+
+    let token: LoginResponse;
     try {
       token = await this.login.execute(loginData);
       if (!token) {
@@ -24,7 +25,7 @@ export class DownloadPdfsUseCase {
       console.log('Token obtido com sucesso.');
     } catch (error) {
       console.error('Erro ao obter o token:', error.message);
-      return;
+       return [];
     }
 
     let payload;
@@ -36,21 +37,16 @@ export class DownloadPdfsUseCase {
       console.log(`Payload decodificado: ${JSON.stringify(payload)}`);
     } catch (error) {
       console.error('Erro ao decodificar o payload:', error.message);
-      return;
     }
-
+    let response: UcInvoice[]=[]
     if (payload.sub) {
       try {
         console.log('Buscando UCS associadas ao usuário...');
-        let ucs = await this.externalApiService.getUcs(
+        const ucs = await this.externalApiService.getUcs(
           payload.sub,
           token.token.ne,
         );
 
-        ucs.ucs = ucs.ucs.filter((uc) => {
-          return uc.status === "LIGADA"
-        })
-        
         if (ucs.ucs) {
           console.log(`Total de UCS encontradas: ${ucs.ucs.length}`);
           for (const uc of ucs.ucs) {
@@ -80,7 +76,7 @@ export class DownloadPdfsUseCase {
                 invoices.faturas.sort((a, b) =>
                   b.mesReferencia.localeCompare(a.mesReferencia),
                 );
-
+                let InvoicesData: Invoice[] =[]
                 for (const fatura of invoices.faturas.slice(0, months)) {
                   try {
                     console.log(
@@ -100,11 +96,7 @@ export class DownloadPdfsUseCase {
                       console.log(
                         `Fatura ${fatura.numeroFatura} baixada com sucesso.`,
                       );
-                      this.savePdf(
-                        `${uc.uc} - ${uc.local?.endereco}`,
-                        fatura.mesReferencia,
-                        pdfResponse.fileData,
-                      );
+                      InvoicesData.push({fileData: pdfResponse.fileData, fileExtension: pdfResponse.fileExtension, fileName: pdfResponse.fileName, fileSize: Number(pdfResponse.fileSize), month: fatura.mesReferencia})
                     } else {
                       console.log(
                         `Falha ao baixar fatura ${fatura.numeroFatura}: PDF não encontrado.`,
@@ -116,6 +108,7 @@ export class DownloadPdfsUseCase {
                     );
                   }
                 }
+                response.push({uc: Number(uc.contrato), invoices: InvoicesData})
               } catch (protocolError) {
                 console.error(
                   `Erro ao obter o protocolo para UC ${uc.uc}: ${protocolError.message}`,
@@ -126,42 +119,14 @@ export class DownloadPdfsUseCase {
         } else {
           console.log('Nenhuma UC encontrada.');
         }
+
       } catch (error) {
         console.error('Erro ao obter dados das UCS:', error.message);
       }
     } else {
       console.error('Payload do token não contém o sub');
     }
+    return response
   }
 
-  private savePdf(uc: string, fileName: string, fileData: string): void {
-    console.log(`Salvando PDF para UC ${uc}: ${fileName}.pdf`);
-
-    const directoryPath = path.join(
-      __dirname,
-      '..',
-      '..',
-      '..',
-      'downloaded_files',
-      uc,
-    );
-
-    const safeFileName = fileName.replace(/\//g, '-');
-    const filePath = path.join(directoryPath, `${safeFileName}.pdf`);
-
-    try {
-      if (!fs.existsSync(directoryPath)) {
-        console.log(`Criando diretório: ${directoryPath}`);
-        fs.mkdirSync(directoryPath, { recursive: true });
-      }
-
-      const pdfBuffer = Buffer.from(fileData, 'base64');
-      fs.writeFileSync(filePath, pdfBuffer);
-      console.log(`Arquivo salvo com sucesso: ${filePath}`);
-    } catch (error) {
-      console.error(
-        `Erro ao salvar o arquivo ${fileName}.pdf: ${error.message}`,
-      );
-    }
-  }
 }

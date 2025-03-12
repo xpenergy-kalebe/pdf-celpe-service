@@ -14,11 +14,12 @@ import { UcResponse, ucsResponse } from './external-services/dto/ucs.dto';
 import { invoicesResponse } from './external-services/dto/fatura.dto';
 import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
-import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
+import { GetAllPdfsUseCase } from './usecases/getAllPdfs.usecase';
 import { GetUCPix } from './usecases/getUcPix.usecase';
 import { Pix, PixList } from './dto/pix.dto';
 import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
 import { UcInvoice } from './dto/invoice.dto';
+import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
 
 @Controller('celpe')
 export class CelpeController {
@@ -28,10 +29,11 @@ export class CelpeController {
     private readonly getUcUseCase: GetUcUseCase,
     private readonly getProtocolUseCase: GetProtocolUseCase,
     private readonly getInvoicesUseCase: GetInvoicesUseCase,
-    private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
+    private readonly getAllPdfsUseCase: GetAllPdfsUseCase,
     private readonly getUcPixUseCase: GetUCPix,
     private readonly getAllPixUseCase: GetAllPixUseCase,
-  ) {}
+    private readonly downloadPdfsUseCase: DownloadPdfsUseCase
+  ) { }
 
   @Post('login')
   async login(@Body() loginData: LoginRequest): Promise<LoginResponse> {
@@ -87,13 +89,13 @@ export class CelpeController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  @Post('download/:month')
-  async downloadPdfs(
+  @Post('invoices/:month')
+  async getPdfs(
     @Param('month') month: string,
     @Body() loginData: LoginRequest,
   ): Promise<UcInvoice[]> {
     try {
-      return await this.downloadPdfsUseCase.execute(loginData, Number(month));
+      return await this.getAllPdfsUseCase.execute(loginData, Number(month));
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -104,7 +106,7 @@ export class CelpeController {
     @Param('ucId') ucId: string,
     @Body() loginData: LoginRequest,
   ): Promise<Pix> {
-    try { 
+    try {
       return await this.getUcPixUseCase.execute(loginData, ucId);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -117,6 +119,18 @@ export class CelpeController {
   ): Promise<PixList[]> {
     try {
       return await this.getAllPixUseCase.execute(loginData);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('download/:month')
+  async downloadPdfs(
+    @Param('month') month: string,
+    @Body() loginData: LoginRequest,
+  ): Promise<void> {
+    try {
+      await this.downloadPdfsUseCase.execute(loginData, Number(month));
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

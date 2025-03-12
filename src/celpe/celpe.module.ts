@@ -10,9 +10,10 @@ import { GetUcsUseCase } from './usecases/getUcs.usecase';
 import { GetUcUseCase } from './usecases/getUc.usecase';
 import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
 import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
-import { DownloadPdfsUseCase } from './usecases/downloadpdfs.usecase';
+import { GetAllPdfsUseCase } from './usecases/getAllPdfs.usecase';
 import { GetUCPix } from './usecases/getUcPix.usecase';
 import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
+import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
 @Module({
   imports: [HttpModule],
   providers: [
@@ -28,6 +29,7 @@ import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
     LoginBot,
     GetUCPix,
     GetAllPixUseCase,
+    GetAllPdfsUseCase
   ],
   exports: [ExternalApiService, ExecuteLoginUseCase],
   controllers: [CelpeController],
