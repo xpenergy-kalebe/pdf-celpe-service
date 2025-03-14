@@ -22,10 +22,12 @@ export class LoginBot {
     const executablePath = await chromium.executablePath();
     console.log(`[LoginBot] Executable path do Chromium: ${executablePath}`);
 
+    const isServerless = process.env.VERCEL_ENV !== undefined; // ou outra variável de ambiente que identifique seu ambiente
+
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: executablePath || undefined,
-      headless: chromium.headless,
+      executablePath: isServerless ? await chromium.executablePath() : undefined,
+      headless: isServerless ? chromium.headless : true, // ou true, conforme sua necessidade local
     });
     console.log(`[LoginBot] Navegador iniciado`);
 
@@ -60,32 +62,26 @@ export class LoginBot {
       console.log(`[LoginBot] Acessando a página de login...`);
       await page.goto('https://agenciavirtual.neoenergia.com/#/login', {
         waitUntil: 'networkidle2',
-        timeout: 90000 // 90 segundos
+        timeout: 90000 
       });
       console.log(`[LoginBot] Página de login carregada`);
 
-      // Simula o movimento do mouse
       console.log(`[LoginBot] Iniciando simulação de movimento do mouse...`);
-      await this.simulateMouseMovement(page);
-      console.log(`[LoginBot] Simulação de movimento concluída`);
+        console.log(`[LoginBot] Simulação de movimento concluída`);
 
       console.log(`[LoginBot] Clicando na posição (250, 250)`);
       await page.mouse.click(250, 250);
       console.log(`[LoginBot] Rolando a página...`);
-      await page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
-      await this.randomDelay();
 
       console.log(`[LoginBot] Aguardando seletor do botão de login...`);
       await page.waitForSelector('.btn-login.mat-button', { timeout: 90000 });
       console.log(`[LoginBot] Clicando no botão de login...`);
       await page.click('.btn-login.mat-button');
-      await this.randomDelay();
 
       console.log(`[LoginBot] Aguardando campo de CPF/CNPJ...`);
       await page.waitForSelector('input[data-placeholder="CPF/CNPJ"]', { timeout: 90000 });
       console.log(`[LoginBot] Digitando CPF/CNPJ...`);
       await this.typeWithDelay(page, 'input[data-placeholder="CPF/CNPJ"]', username);
-      await this.randomDelay();
 
       console.log(`[LoginBot] Aguardando campo de Senha...`);
       await page.waitForSelector('input[data-placeholder="Senha"]', { timeout: 90000 });
@@ -111,20 +107,6 @@ export class LoginBot {
     }
   }
 
-  private async simulateMouseMovement(page: Page): Promise<void> {
-    const movements = [
-      { x: 100, y: 100, steps: 5 },
-      { x: 200, y: 200, steps: 7 },
-      { x: 300, y: 300, steps: 10 },
-      { x: 500, y: 500, steps: 12 },
-    ];
-
-    for (const move of movements) {
-      console.log(`[LoginBot] Movendo o mouse para (${move.x}, ${move.y}) em ${move.steps} passos`);
-      await page.mouse.move(move.x, move.y, { steps: move.steps });
-      await this.randomDelay(200, 400);
-    }
-  }
 
   private async typeWithDelay(
     page: Page,
