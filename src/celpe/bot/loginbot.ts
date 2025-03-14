@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-const chrome = require('chrome-aws-lambda');
+import chrome from 'chrome-aws-lambda';
 import { Page } from 'puppeteer';
 
 import {
