@@ -16,15 +16,22 @@ puppeteer.use(StealthPlugin());
 export class LoginBot {
   async executeLogin(loginData: LoginRequest): Promise<LoginResponse> {
     const { username, password } = loginData;
+    console.log(`[LoginBot] Iniciando o login para o usuário: ${username}`);
+
+    // Lançando o navegador com Chromium configurado para ambientes serverless
+    const executablePath = await chromium.executablePath();
+    console.log(`[LoginBot] Executable path do Chromium: ${executablePath}`);
 
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: await chromium.executablePath(),
+      executablePath: executablePath || undefined,
       headless: chromium.headless,
     });
+    console.log(`[LoginBot] Navegador iniciado`);
 
     const page = await browser.newPage();
 
+    // Promessa para capturar a resposta de login
     const loginResponsePromise = new Promise<LoginResponse>((resolve, reject) => {
       page.on('response', async (response) => {
         const url = response.url();
@@ -36,10 +43,13 @@ export class LoginBot {
           response.status() !== 304 &&
           method !== 'OPTIONS'
         ) {
+          console.log(`[LoginBot] Resposta recebida da URL: ${url}`);
           try {
             const responseBody: LoginResponse = await response.json();
+            console.log(`[LoginBot] Resposta processada com sucesso`);
             resolve(responseBody);
           } catch (error) {
+            console.error(`[LoginBot] Erro ao processar a resposta: ${error.message}`);
             reject(new Error('Erro ao processar a resposta: ' + error.message));
           }
         }
@@ -47,37 +57,56 @@ export class LoginBot {
     });
 
     try {
+      console.log(`[LoginBot] Acessando a página de login...`);
       await page.goto('https://agenciavirtual.neoenergia.com/#/login', {
         waitUntil: 'networkidle2',
+        timeout: 90000 // 90 segundos
       });
+      console.log(`[LoginBot] Página de login carregada`);
 
+      // Simula o movimento do mouse
+      console.log(`[LoginBot] Iniciando simulação de movimento do mouse...`);
       await this.simulateMouseMovement(page);
+      console.log(`[LoginBot] Simulação de movimento concluída`);
 
+      console.log(`[LoginBot] Clicando na posição (250, 250)`);
       await page.mouse.click(250, 250);
+      console.log(`[LoginBot] Rolando a página...`);
       await page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
       await this.randomDelay();
 
-      await page.waitForSelector('.btn-login.mat-button');
+      console.log(`[LoginBot] Aguardando seletor do botão de login...`);
+      await page.waitForSelector('.btn-login.mat-button', { timeout: 90000 });
+      console.log(`[LoginBot] Clicando no botão de login...`);
       await page.click('.btn-login.mat-button');
       await this.randomDelay();
 
-      await page.waitForSelector('input[data-placeholder="CPF/CNPJ"]');
+      console.log(`[LoginBot] Aguardando campo de CPF/CNPJ...`);
+      await page.waitForSelector('input[data-placeholder="CPF/CNPJ"]', { timeout: 90000 });
+      console.log(`[LoginBot] Digitando CPF/CNPJ...`);
       await this.typeWithDelay(page, 'input[data-placeholder="CPF/CNPJ"]', username);
       await this.randomDelay();
 
-      await page.waitForSelector('input[data-placeholder="Senha"]');
+      console.log(`[LoginBot] Aguardando campo de Senha...`);
+      await page.waitForSelector('input[data-placeholder="Senha"]', { timeout: 90000 });
+      console.log(`[LoginBot] Digitando Senha...`);
       await this.typeWithDelay(page, 'input[data-placeholder="Senha"]', password);
       await this.randomDelay();
 
+      console.log(`[LoginBot] Clicando no botão Entrar...`);
       await page.click('button[title="Entrar"]');
       await this.randomDelay();
 
+      console.log(`[LoginBot] Aguardando resposta do login...`);
       const loginResponse = await loginResponsePromise;
+      console.log(`[LoginBot] Login realizado com sucesso`);
+
       await browser.close();
+      console.log(`[LoginBot] Navegador fechado`);
 
       return loginResponse;
     } catch (error) {
-      console.error('Erro no bot de login:', error.message);
+      console.error(`[LoginBot] Erro no bot de login: ${error.message}`);
       throw new Error('Falha ao realizar o login.');
     }
   }
@@ -91,6 +120,7 @@ export class LoginBot {
     ];
 
     for (const move of movements) {
+      console.log(`[LoginBot] Movendo o mouse para (${move.x}, ${move.y}) em ${move.steps} passos`);
       await page.mouse.move(move.x, move.y, { steps: move.steps });
       await this.randomDelay(200, 400);
     }
@@ -101,8 +131,10 @@ export class LoginBot {
     selector: string,
     text: string,
   ): Promise<void> {
+    console.log(`[LoginBot] Focando no seletor ${selector}`);
     await page.focus(selector);
     for (let i = 0; i < text.length; i++) {
+      console.log(`[LoginBot] Digitando "${text[i]}" no seletor ${selector}`);
       await page.type(selector, text[i], {
         delay: this.getRandomDelay(50, 100),
       });
@@ -111,6 +143,7 @@ export class LoginBot {
 
   private async randomDelay(min: number = 300, max: number = 700): Promise<void> {
     const delay = this.getRandomDelay(min, max);
+    console.log(`[LoginBot] Aguardando por ${delay}ms`);
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
