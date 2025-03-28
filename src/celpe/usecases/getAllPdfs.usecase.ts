@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
-import { LoginRequest, LoginResponse } from '../external-services/dto/login.dto';
+import {
+  LoginRequest,
+  LoginResponse,
+} from '../external-services/dto/login.dto';
 import { UcInvoice, Invoice } from '../dto/invoice.dto';
-
 
 @Injectable()
 export class GetAllPdfsUseCase {
@@ -25,7 +27,7 @@ export class GetAllPdfsUseCase {
       console.log('Token obtido com sucesso.');
     } catch (error) {
       console.error('Erro ao obter o token:', error.message);
-       return [];
+      return [];
     }
 
     let payload;
@@ -38,7 +40,7 @@ export class GetAllPdfsUseCase {
     } catch (error) {
       console.error('Erro ao decodificar o payload:', error.message);
     }
-    let response: UcInvoice[]=[]
+    let response: UcInvoice[] = [];
     if (payload.sub) {
       try {
         console.log('Buscando UCS associadas ao usuário...');
@@ -76,7 +78,7 @@ export class GetAllPdfsUseCase {
                 invoices.faturas.sort((a, b) =>
                   b.mesReferencia.localeCompare(a.mesReferencia),
                 );
-                let InvoicesData: Invoice[] =[]
+                let InvoicesData: Invoice[] = [];
                 for (const fatura of invoices.faturas.slice(0, months)) {
                   try {
                     console.log(
@@ -96,7 +98,13 @@ export class GetAllPdfsUseCase {
                       console.log(
                         `Fatura ${fatura.numeroFatura} baixada com sucesso.`,
                       );
-                      InvoicesData.push({fileData: pdfResponse.fileData, fileExtension: pdfResponse.fileExtension, fileName: pdfResponse.fileName, fileSize: Number(pdfResponse.fileSize), month: fatura.mesReferencia})
+                      InvoicesData.push({
+                        fileData: pdfResponse.fileData,
+                        fileExtension: pdfResponse.fileExtension,
+                        fileName: pdfResponse.fileName,
+                        fileSize: Number(pdfResponse.fileSize),
+                        month: fatura.mesReferencia,
+                      });
                     } else {
                       console.log(
                         `Falha ao baixar fatura ${fatura.numeroFatura}: PDF não encontrado.`,
@@ -108,7 +116,10 @@ export class GetAllPdfsUseCase {
                     );
                   }
                 }
-                response.push({uc: Number(uc.contrato), invoices: InvoicesData})
+                response.push({
+                  uc: Number(uc.contrato),
+                  invoices: InvoicesData,
+                });
               } catch (protocolError) {
                 console.error(
                   `Erro ao obter o protocolo para UC ${uc.uc}: ${protocolError.message}`,
@@ -119,14 +130,12 @@ export class GetAllPdfsUseCase {
         } else {
           console.log('Nenhuma UC encontrada.');
         }
-
       } catch (error) {
         console.error('Erro ao obter dados das UCS:', error.message);
       }
     } else {
       console.error('Payload do token não contém o sub');
     }
-    return response
+    return response;
   }
-
 }

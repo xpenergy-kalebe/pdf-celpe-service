@@ -11,7 +11,7 @@ export class DownloadPdfsUseCase {
   constructor(
     private readonly externalApiService: ExternalApiService,
     private readonly login: ExecuteLoginUseCase,
-  ) { }
+  ) {}
   async execute(loginData: LoginRequest, months: number): Promise<void> {
     console.log('Iniciando execução do DownloadPdfsUseCase...');
 
@@ -50,7 +50,7 @@ export class DownloadPdfsUseCase {
         // ucs.ucs = ucs.ucs.filter((uc) => {
         //   return uc.status === "LIGADA"
         // })
-        
+
         if (ucs.ucs) {
           console.log(`Total de UCS encontradas: ${ucs.ucs.length}`);
           for (const uc of ucs.ucs) {

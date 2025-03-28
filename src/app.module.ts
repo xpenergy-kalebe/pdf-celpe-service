@@ -8,4 +8,8 @@ import { CelpeModule } from './celpe/celpe.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    console.log('AppModule instanciado');
+  }
+}

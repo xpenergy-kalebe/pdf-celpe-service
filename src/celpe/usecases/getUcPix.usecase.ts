@@ -11,7 +11,7 @@ export class GetUCPix {
   constructor(
     private readonly externalApiService: ExternalApiService,
     private readonly login: ExecuteLoginUseCase,
-  ) { }
+  ) {}
 
   async execute(loginData: LoginRequest, ucId: string): Promise<Pix> {
     const token = await this.login.execute(loginData);

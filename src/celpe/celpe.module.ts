@@ -29,7 +29,7 @@ import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
     LoginBot,
     GetUCPix,
     GetAllPixUseCase,
-    GetAllPdfsUseCase
+    GetAllPdfsUseCase,
   ],
   exports: [ExternalApiService, ExecuteLoginUseCase],
   controllers: [CelpeController],

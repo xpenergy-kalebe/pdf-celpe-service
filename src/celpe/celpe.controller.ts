@@ -32,8 +32,8 @@ export class CelpeController {
     private readonly getAllPdfsUseCase: GetAllPdfsUseCase,
     private readonly getUcPixUseCase: GetUCPix,
     private readonly getAllPixUseCase: GetAllPixUseCase,
-    private readonly downloadPdfsUseCase: DownloadPdfsUseCase
-  ) { }
+    private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
+  ) {}
 
   @Post('login')
   async login(@Body() loginData: LoginRequest): Promise<LoginResponse> {
@@ -114,9 +114,7 @@ export class CelpeController {
   }
 
   @Post('pix')
-  async getAllPix(
-    @Body() loginData: LoginRequest,
-  ): Promise<PixList[]> {
+  async getAllPix(@Body() loginData: LoginRequest): Promise<PixList[]> {
     try {
       return await this.getAllPixUseCase.execute(loginData);
     } catch (error) {

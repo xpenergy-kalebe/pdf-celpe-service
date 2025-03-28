@@ -42,7 +42,9 @@ export class LoginBot {
     let browser;
     try {
       browser = await puppeteer.launch({
-        args: isServerless ? chrome.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: isServerless
+          ? chrome.args
+          : ['--no-sandbox', '--disable-setuid-sandbox'],
         executablePath: isServerless ? await chrome.executablePath : undefined,
         headless: isServerless ? chrome.headless : true,
         defaultViewport: isServerless ? chrome.defaultViewport : null,
@@ -56,29 +58,35 @@ export class LoginBot {
     const page = await browser.newPage();
 
     // Promessa para capturar a resposta de login
-    const loginResponsePromise = new Promise<LoginResponse>((resolve, reject) => {
-      page.on('response', async (response) => {
-        const url = response.url();
-        const method = response.request().method();
+    const loginResponsePromise = new Promise<LoginResponse>(
+      (resolve, reject) => {
+        page.on('response', async (response) => {
+          const url = response.url();
+          const method = response.request().method();
 
-        if (
-          url.includes('autentica') &&
-          response.status() !== 204 &&
-          response.status() !== 304 &&
-          method !== 'OPTIONS'
-        ) {
-          console.log(`[LoginBot] Resposta recebida da URL: ${url}`);
-          try {
-            const responseBody: LoginResponse = await response.json();
-            console.log(`[LoginBot] Resposta processada com sucesso`);
-            resolve(responseBody);
-          } catch (error) {
-            console.error(`[LoginBot] Erro ao processar a resposta: ${error.message}`);
-            reject(new Error('Erro ao processar a resposta: ' + error.message));
+          if (
+            url.includes('autentica') &&
+            response.status() !== 204 &&
+            response.status() !== 304 &&
+            method !== 'OPTIONS'
+          ) {
+            console.log(`[LoginBot] Resposta recebida da URL: ${url}`);
+            try {
+              const responseBody: LoginResponse = await response.json();
+              console.log(`[LoginBot] Resposta processada com sucesso`);
+              resolve(responseBody);
+            } catch (error) {
+              console.error(
+                `[LoginBot] Erro ao processar a resposta: ${error.message}`,
+              );
+              reject(
+                new Error('Erro ao processar a resposta: ' + error.message),
+              );
+            }
           }
-        }
-      });
-    });
+        });
+      },
+    );
 
     try {
       console.log(`[LoginBot] Acessando a página de login...`);
@@ -105,15 +113,27 @@ export class LoginBot {
       await this.randomDelay();
 
       console.log(`[LoginBot] Aguardando campo de CPF/CNPJ...`);
-      await page.waitForSelector('input[data-placeholder="CPF/CNPJ"]', { timeout: 90000 });
+      await page.waitForSelector('input[data-placeholder="CPF/CNPJ"]', {
+        timeout: 90000,
+      });
       console.log(`[LoginBot] Digitando CPF/CNPJ...`);
-      await this.typeWithDelay(page, 'input[data-placeholder="CPF/CNPJ"]', username);
+      await this.typeWithDelay(
+        page,
+        'input[data-placeholder="CPF/CNPJ"]',
+        username,
+      );
       await this.randomDelay();
 
       console.log(`[LoginBot] Aguardando campo de Senha...`);
-      await page.waitForSelector('input[data-placeholder="Senha"]', { timeout: 90000 });
+      await page.waitForSelector('input[data-placeholder="Senha"]', {
+        timeout: 90000,
+      });
       console.log(`[LoginBot] Digitando Senha...`);
-      await this.typeWithDelay(page, 'input[data-placeholder="Senha"]', password);
+      await this.typeWithDelay(
+        page,
+        'input[data-placeholder="Senha"]',
+        password,
+      );
       await this.randomDelay();
 
       console.log(`[LoginBot] Clicando no botão Entrar...`);
@@ -144,22 +164,33 @@ export class LoginBot {
     ];
 
     for (const move of movements) {
-      console.log(`[LoginBot] Movendo o mouse para (${move.x}, ${move.y}) em ${move.steps} passos`);
+      console.log(
+        `[LoginBot] Movendo o mouse para (${move.x}, ${move.y}) em ${move.steps} passos`,
+      );
       await page.mouse.move(move.x, move.y, { steps: move.steps });
       await this.randomDelay(200, 400);
     }
   }
 
-  private async typeWithDelay(page: Page, selector: string, text: string): Promise<void> {
+  private async typeWithDelay(
+    page: Page,
+    selector: string,
+    text: string,
+  ): Promise<void> {
     console.log(`[LoginBot] Focando no seletor ${selector}`);
     await page.focus(selector);
     for (let i = 0; i < text.length; i++) {
       console.log(`[LoginBot] Digitando "${text[i]}" no seletor ${selector}`);
-      await page.type(selector, text[i], { delay: this.getRandomDelay(50, 100) });
+      await page.type(selector, text[i], {
+        delay: this.getRandomDelay(50, 100),
+      });
     }
   }
 
-  private async randomDelay(min: number = 300, max: number = 700): Promise<void> {
+  private async randomDelay(
+    min: number = 300,
+    max: number = 700,
+  ): Promise<void> {
     const delay = this.getRandomDelay(min, max);
     console.log(`[LoginBot] Aguardando por ${delay}ms`);
     await new Promise((resolve) => setTimeout(resolve, delay));
