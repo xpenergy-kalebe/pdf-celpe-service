@@ -2,31 +2,26 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import express, { Express, Request, Response } from 'express';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import { INestApplication } from '@nestjs/common';
 
 const server: Express = express();
 let isInitialized = false;
 
 async function createNestServer(expressInstance: Express) {
-  const adapter: ExpressAdapter = new ExpressAdapter(expressInstance);
-  const app: INestApplication = await NestFactory.create(AppModule, adapter);
+  const adapter = new ExpressAdapter(expressInstance);
+  const app = await NestFactory.create(AppModule, adapter);
+  
   await app.init();
   isInitialized = true;
-
-  // Add app.listen(3000) here
-  app.listen(3000, () => {
-    console.log('Application is running on http://localhost:3000');
-  });
+  console.log('NestJS application initialized with AppModule');
 }
 
-const bootstrapPromise = createNestServer(server);
+const bootstrapPromise =  createNestServer(server);
 
 export async function main(req: Request, res: Response) {
-  server.use(async (_req: Request, _res: Response, next) => {
-    if (!isInitialized) {
-      await bootstrapPromise;
-    }
-    next();
-  });
+  await bootstrapPromise;
+  if (!isInitialized) {
+    throw new Error('NestJS application is not initialized yet.');
+  }
+  // Encaminha a requisição para o Express, que está integrado com o NestJS
   return server(req, res);
 }
