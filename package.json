@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "start:cloud": "npm run build && npx @google-cloud/functions-framework --source=dist/ --target=main --debug",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -28,6 +29,7 @@
     "axios": "^1.8.1",
     "capsolver": "^1.0.1",
     "chrome-aws-lambda": "^10.1.0",
+    "express": "^3.21.2",
     "jsonwebtoken": "^9.0.2",
     "puppeteer": "^24.3.0",
     "puppeteer-extra": "^3.3.6",
@@ -41,6 +43,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@google-cloud/functions-framework": "^3.5.1",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
