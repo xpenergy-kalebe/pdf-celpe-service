@@ -19,7 +19,7 @@ import { GetUCPix } from './usecases/getUcPix.usecase';
 import { Pix, PixList } from './dto/pix.dto';
 import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
 import { UcInvoice } from './dto/invoice.dto';
-import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
+// import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
 
 @Controller('celpe')
 export class CelpeController {
@@ -32,7 +32,7 @@ export class CelpeController {
     private readonly getAllPdfsUseCase: GetAllPdfsUseCase,
     private readonly getUcPixUseCase: GetUCPix,
     private readonly getAllPixUseCase: GetAllPixUseCase,
-    private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
+    // private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
   ) {}
 
   @Post('login')
@@ -128,7 +128,7 @@ export class CelpeController {
     @Body() loginData: LoginRequest,
   ): Promise<void> {
     try {
-      await this.downloadPdfsUseCase.execute(loginData, Number(month));
+      // await this.downloadPdfsUseCase.execute(loginData, Number(month));
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

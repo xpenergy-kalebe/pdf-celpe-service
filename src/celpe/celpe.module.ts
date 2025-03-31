@@ -13,7 +13,7 @@ import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
 import { GetAllPdfsUseCase } from './usecases/getAllPdfs.usecase';
 import { GetUCPix } from './usecases/getUcPix.usecase';
 import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
-import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
+// import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
 @Module({
   imports: [HttpModule],
   providers: [
@@ -25,7 +25,7 @@ import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
     GetUcUseCase,
     GetUcsUseCase,
     GetInvoicesUseCase,
-    DownloadPdfsUseCase,
+    // DownloadPdfsUseCase,
     LoginBot,
     GetUCPix,
     GetAllPixUseCase,
