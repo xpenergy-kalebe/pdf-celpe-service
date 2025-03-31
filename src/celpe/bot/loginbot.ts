@@ -45,7 +45,7 @@ export class LoginBot {
         args: isServerless
           ? chrome.args
           : ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: isServerless ? await chrome.executablePath : undefined,
+        executablePath: "/usr/bin/chromium",
         headless: isServerless ? chrome.headless : true,
         defaultViewport: isServerless ? chrome.defaultViewport : null,
       });
