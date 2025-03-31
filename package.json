@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "start:cloud": "npm run build  && npx @google-cloud/functions-framework --source=dist/ --target=main --debug",
+    "start:cloud": "npm run build && npx @google-cloud/functions-framework --source=dist --target=main --debug",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

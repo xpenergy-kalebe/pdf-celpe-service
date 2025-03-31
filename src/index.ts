@@ -1,27 +1,88 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import express, { Express, Request, Response } from 'express';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import express, { Request, Response } from 'express';
 
-const server: Express = express();
+// Instância única do Express e do Nest
+const expressApp = express();
+let nestApp: any;
 let isInitialized = false;
 
-async function createNestServer(expressInstance: Express) {
-  const adapter = new ExpressAdapter(expressInstance);
-  const app = await NestFactory.create(AppModule, adapter);
-  
-  await app.init();
+/**
+ * Inicializa o Nest dentro do Express
+ */
+async function bootstrap() {
+  if (isInitialized) return;
+
+  console.log('🚀 Inicializando NestJS...');
+  const adapter = new ExpressAdapter(expressApp);
+  nestApp = await NestFactory.create(AppModule, adapter);
+
+  // Define global prefix
+
+  await nestApp.init();
   isInitialized = true;
-  console.log('NestJS application initialized with AppModule');
+
+  console.log('✅ NestJS Initialized');
+  printRoutes();
 }
 
-const bootstrapPromise =  createNestServer(server);
+// Inicia o Nest logo no start
+const ready = bootstrap();
 
+/**
+ * Exporta a função handler para Cloud Functions
+ */
 export async function main(req: Request, res: Response) {
-  await bootstrapPromise;
-  if (!isInitialized) {
-    throw new Error('NestJS application is not initialized yet.');
+  console.log('\n📥 Requisição recebida:');
+  console.log('➡️  Método:', req.method);
+  console.log('➡️  URL:', req.url);
+  console.log('➡️  Base URL:', req.baseUrl);
+  console.log('➡️  Original URL:', req.originalUrl);
+  console.log('➡️  Path:', req.path);
+  console.log('➡️  Headers:', req.headers);
+
+  try {
+    await ready;
+    expressApp(req, res, () => {
+      console.log('🔚 Express finalizou o request.');
+      if (!res.headersSent) {
+        res.status(404).send('Not Found');
+      }
+    });
+  } catch (err) {
+    console.error('❌ Erro ao processar requisição', err);
+    if (!res.headersSent) {
+      res.status(500).send('Internal server error');
+    }
   }
-  // Encaminha a requisição para o Express, que está integrado com o NestJS
-  return server(req, res);
+}
+
+/**
+ * Loga todas as rotas registradas
+ */
+function printRoutes() {
+  const router = expressApp._router;
+  const routes: string[] = [];
+
+  if (router && router.map) {
+    for (const method in router.map) {
+      router.map[method].forEach((route) => {
+        routes.push(`${method.toUpperCase()} ${route.path}`);
+      });
+    }
+  } else if (router && router.stack) {
+    router.stack.forEach((middleware) => {
+      if (middleware.route) {
+        const methods = Object.keys(middleware.route.methods)
+          .filter((m) => middleware.route.methods[m])
+          .join(', ')
+          .toUpperCase();
+        routes.push(`${methods} ${middleware.route.path}`);
+      }
+    });
+  }
+
+  console.log('\n📄 Rotas registradas pelo Nest/Express:\n');
+  routes.forEach((route) => console.log(`➡️  ${route}`));
 }
