@@ -1,10 +1,9 @@
-# Base Node image
+# Dockerfile para Nest + Puppeteer na Render
 FROM node:18-slim
 
 # Instala dependências do Chromium
 RUN apt-get update && apt-get install -y \
-    wget \
-    ca-certificates \
+    chromium \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -20,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     libxdamage1 \
     libxrandr2 \
     xdg-utils \
-    chromium
+    --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # Cria diretório app
 WORKDIR /app
@@ -34,8 +33,8 @@ RUN npm install
 # Builda app
 RUN npm run build
 
-# Expõe a porta
+# Expõe porta
 EXPOSE 3000
 
-# Start command
+# Start
 CMD ["npm", "run", "start:prod"]

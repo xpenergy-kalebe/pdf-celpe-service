@@ -45,7 +45,7 @@ export class LoginBot {
         args: isServerless
           ? chrome.args
           : ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: "/usr/bin/chromium",
+        executablePath: "/opt/render/.cache/puppeteer",
         headless: isServerless ? chrome.headless : true,
         defaultViewport: isServerless ? chrome.defaultViewport : null,
       });
