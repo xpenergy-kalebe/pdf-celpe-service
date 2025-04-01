@@ -1,33 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import chrome from 'chrome-aws-lambda';
-require('puppeteer-extra-plugin-stealth/evasions/chrome.app');
-require('puppeteer-extra-plugin-stealth/evasions/chrome.csi');
-require('puppeteer-extra-plugin-stealth/evasions/chrome.loadTimes');
-require('puppeteer-extra-plugin-stealth/evasions/chrome.runtime');
-require('puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow');
-require('puppeteer-extra-plugin-stealth/evasions/media.codecs');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.hardwareConcurrency');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.languages');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.permissions');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.plugins');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.vendor');
-require('puppeteer-extra-plugin-stealth/evasions/navigator.webdriver');
-require('puppeteer-extra-plugin-stealth/evasions/sourceurl');
-require('puppeteer-extra-plugin-stealth/evasions/user-agent-override');
-require('puppeteer-extra-plugin-stealth/evasions/webgl.vendor');
-require('puppeteer-extra-plugin-stealth/evasions/window.outerdimensions');
-require('puppeteer-extra-plugin-stealth/evasions/defaultArgs');
-require('puppeteer-extra-plugin-user-preferences');
-require('puppeteer-extra-plugin-user-data-dir');
 import { Page } from 'puppeteer';
-
+import chromeLambda from 'chrome-aws-lambda';
 import {
   LoginRequest,
   LoginResponse,
 } from '../external-services/dto/login.dto';
 
+async function setupBrowser() {
+  const executablePath = await chromeLambda.executablePath;
+  return executablePath
+}
 puppeteer.use(StealthPlugin());
 
 @Injectable()
@@ -36,18 +20,14 @@ export class LoginBot {
     const { username, password } = loginData;
     console.log(`[LoginBot] Iniciando o login para o usuário: ${username}`);
 
-    const isServerless = process.env.VERCEL_ENV !== undefined;
 
     // Inicia o navegador com as configurações do chrome-aws-lambda se estiver em ambiente serverless
     let browser;
     try {
       browser = await puppeteer.launch({
-        args: isServerless
-          ? chrome.args
-          : ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: isServerless ? await chrome.executablePath : undefined,
-        headless: isServerless ? chrome.headless : true,
-        defaultViewport: isServerless ? chrome.defaultViewport : null,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        headless: true,
+        executablePath: await setupBrowser()
       });
       console.log(`[LoginBot] Navegador iniciado`);
     } catch (error) {

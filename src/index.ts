@@ -37,10 +37,7 @@ export async function main(req: Request, res: Response) {
   console.log('\n📥 Requisição recebida:');
   console.log('➡️  Método:', req.method);
   console.log('➡️  URL:', req.url);
-  console.log('➡️  Base URL:', req.baseUrl);
-  console.log('➡️  Original URL:', req.originalUrl);
-  console.log('➡️  Path:', req.path);
-  console.log('➡️  Headers:', req.headers);
+
 
   try {
     await ready;
