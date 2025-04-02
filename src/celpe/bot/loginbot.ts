@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
 import { Page } from 'puppeteer';
-import chromeLambda from 'chrome-aws-lambda';
+
 import {
   LoginRequest,
   LoginResponse,
 } from '../external-services/dto/login.dto';
 
-async function setupBrowser() {
-  const executablePath = await chromeLambda.executablePath;
-  return executablePath
-}
 puppeteer.use(StealthPlugin());
 
 @Injectable()
@@ -24,11 +21,7 @@ export class LoginBot {
     // Inicia o navegador com as configurações do chrome-aws-lambda se estiver em ambiente serverless
     let browser;
     try {
-      browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        headless: true,
-        executablePath: await setupBrowser()
-      });
+      browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
       console.log(`[LoginBot] Navegador iniciado`);
     } catch (error) {
       console.error(`[LoginBot] Erro ao iniciar o navegador: ${error.message}`);

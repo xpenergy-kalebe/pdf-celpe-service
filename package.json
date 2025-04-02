@@ -8,6 +8,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "gcp-build": "node node_modules/puppeteer/install.js",
     "start:cloud": "cls && npm run build && npx @google-cloud/functions-framework --source=dist --target=main --debug",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "npx puppeteer browsers install chrome && nest start",
@@ -32,7 +33,7 @@
     "chrome-aws-lambda": "^10.1.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "puppeteer": "^24.3.0",
+    "puppeteer": "^10.0.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "reflect-metadata": "^0.2.2",
