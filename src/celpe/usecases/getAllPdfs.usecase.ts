@@ -48,7 +48,9 @@ export class GetAllPdfsUseCase {
           payload.sub,
           token.token.ne,
         );
-
+         ucs.ucs = ucs.ucs.filter((uc) => {
+         return uc.status === "LIGADA"
+         })
         if (ucs.ucs) {
           console.log(`Total de UCS encontradas: ${ucs.ucs.length}`);
           for (const uc of ucs.ucs) {
@@ -74,10 +76,10 @@ export class GetAllPdfsUseCase {
                 console.log(
                   `Faturas encontradas para UC ${uc.uc}: ${invoices.faturas.length}`,
                 );
-
                 invoices.faturas.sort((a, b) =>
                   b.mesReferencia.localeCompare(a.mesReferencia),
                 );
+
                 let InvoicesData: Invoice[] = [];
                 for (const fatura of invoices.faturas.slice(0, months)) {
                   try {

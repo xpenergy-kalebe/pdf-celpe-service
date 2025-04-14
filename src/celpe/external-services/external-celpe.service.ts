@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ApiHelper } from 'src/common/helpers/apiHelper';
-import { LoginRequest, LoginResponse } from './dto/login.dto';
-import { UcResponse, ucsResponse } from './dto/ucs.dto';
 import { LoginBot } from '../bot/loginbot';
-import { invoicesResponse } from './dto/fatura.dto';
-import { FileResponse } from './dto/file.dto';
-import { PixRequest, PixResponse } from './dto/pix.dto';
+import { PixRequest, PixResponse, FileResponse, invoicesResponse, UcResponse, ucsResponse, LoginRequest, LoginResponse, ProtocolResponse } from './dto';
 export const api = 'https://apineprd.neoenergia.com';
 
 @Injectable()
@@ -13,7 +9,7 @@ export class ExternalApiService {
   constructor(
     private readonly apiHelper: ApiHelper,
     private readonly loginBot: LoginBot,
-  ) {}
+  ) { }
 
   async Login(loginData: LoginRequest): Promise<LoginResponse> {
     return this.loginBot.executeLogin(loginData);

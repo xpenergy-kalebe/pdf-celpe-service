@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { LoginRequest } from '../external-services/dto/login.dto';
 import { ExternalApiService } from '../external-services/external-celpe.service';
-import { UcResponse } from '../external-services/dto/ucs.dto';
+import { UcResponse, LoginRequest } from '../external-services/dto';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
 
@@ -10,7 +9,7 @@ export class GetUcUseCase {
   constructor(
     private readonly externalApiService: ExternalApiService,
     private readonly login: ExecuteLoginUseCase,
-  ) {}
+  ) { }
 
   async execute(
     loginData: LoginRequest,

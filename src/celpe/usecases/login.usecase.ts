@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   LoginRequest,
   LoginResponse,
-} from '../external-services/dto/login.dto';
+} from '../external-services/dto';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 
 @Injectable()

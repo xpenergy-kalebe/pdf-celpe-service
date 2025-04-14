@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
-import { LoginRequest } from '../external-services/dto/login.dto';
+import { LoginRequest } from '../external-services/dto';
 import * as fs from 'fs';
 import * as path from 'path';
 

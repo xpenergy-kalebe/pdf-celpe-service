@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
-import { LoginRequest } from '../external-services/dto/login.dto';
-import { PixRequest } from '../external-services/dto/pix.dto';
-import { Pix } from '../dto/pix.dto';
-
+import { LoginRequest, PixRequest } from '../external-services/dto';
+import { Pix } from '../dto';
 @Injectable()
 export class GetUCPix {
   constructor(

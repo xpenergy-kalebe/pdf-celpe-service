@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { LoginRequest } from '../external-services/dto/login.dto';
 import { ExternalApiService } from '../external-services/external-celpe.service';
-import { ucsResponse } from '../external-services/dto/ucs.dto';
+import { ucsResponse,  LoginRequest } from '../external-services/dto';
 import { ExecuteLoginUseCase } from './login.usecase';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
 

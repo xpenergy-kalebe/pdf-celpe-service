@@ -1,8 +1,8 @@
-interface Retorno {
+export interface Retorno {
   e_resultado: string | null;
 }
 
-interface ProtocolResponse {
+export interface ProtocolResponse {
   protocoloSalesforce: number | null;
   protocoloSalesforceStr: string | null;
   protocoloLegado: number | null;

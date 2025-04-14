@@ -6,19 +6,10 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { ExecuteLoginUseCase } from './usecases/login.usecase';
-import { GetUcsUseCase } from './usecases/getUcs.usecase';
-import { GetUcUseCase } from './usecases/getUc.usecase';
-import { LoginRequest, LoginResponse } from './external-services/dto/login.dto';
-import { UcResponse, ucsResponse } from './external-services/dto/ucs.dto';
-import { invoicesResponse } from './external-services/dto/fatura.dto';
-import { GetProtocolUseCase } from './usecases/getProtocol.usecase';
-import { GetInvoicesUseCase } from './usecases/getInvoices.usecase';
+import { UcResponse, ucsResponse, LoginRequest, LoginResponse, invoicesResponse, ProtocolResponse } from './external-services/dto';
+import { Pix, PixList, UcInvoice } from './dto';
 import { GetAllPdfsUseCase } from './usecases/getAllPdfs.usecase';
-import { GetUCPix } from './usecases/getUcPix.usecase';
-import { Pix, PixList } from './dto/pix.dto';
-import { GetAllPixUseCase } from './usecases/getAllPix.usecase';
-import { UcInvoice } from './dto/invoice.dto';
+import { GetAllPixUseCase, GetUCPix, GetUcUseCase, GetUcsUseCase, ExecuteLoginUseCase, GetProtocolUseCase, GetInvoicesUseCase, } from './usecases';
 // import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
 
 @Controller('celpe')
@@ -33,7 +24,7 @@ export class CelpeController {
     private readonly getUcPixUseCase: GetUCPix,
     private readonly getAllPixUseCase: GetAllPixUseCase,
     // private readonly downloadPdfsUseCase: DownloadPdfsUseCase,
-  ) {}
+  ) { }
 
   @Post('login')
   async login(@Body() loginData: LoginRequest): Promise<LoginResponse> {
