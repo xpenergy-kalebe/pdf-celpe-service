@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   HttpException,
-  HttpStatus,
   Param,
   Post,
 } from '@nestjs/common';
@@ -32,7 +31,7 @@ export class CelpeController {
       const response = await this.executeLoginUseCase.execute(loginData);
       return response;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
   @Post('unidades')
@@ -41,7 +40,7 @@ export class CelpeController {
       const response = await this.getUcsUseCase.execute(loginData);
       return response;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
   @Post('unidade/:id')
@@ -53,7 +52,7 @@ export class CelpeController {
       const response = await this.getUcUseCase.execute(loginData, id);
       return response;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
   @Post('protocolo/:id')
@@ -65,7 +64,7 @@ export class CelpeController {
       const response = await this.getProtocolUseCase.execute(loginData, id);
       return response;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
   @Post('faturas/:id')
@@ -77,7 +76,7 @@ export class CelpeController {
       const response = await this.getInvoicesUseCase.execute(loginData, id);
       return response;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
   @Post('invoices/:month')
@@ -88,7 +87,7 @@ export class CelpeController {
     try {
       return await this.getAllPdfsUseCase.execute(loginData, Number(month));
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
 
@@ -100,7 +99,7 @@ export class CelpeController {
     try {
       return await this.getUcPixUseCase.execute(loginData, ucId);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
 
@@ -109,7 +108,7 @@ export class CelpeController {
     try {
       return await this.getAllPixUseCase.execute(loginData);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
 
@@ -121,7 +120,7 @@ export class CelpeController {
     try {
       // await this.downloadPdfsUseCase.execute(loginData, Number(month));
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, error.getStatus());
     }
   }
 }

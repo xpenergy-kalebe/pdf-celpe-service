@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
@@ -13,7 +13,7 @@ export class GetAllPdfsUseCase {
   constructor(
     private readonly externalApiService: ExternalApiService,
     private readonly login: ExecuteLoginUseCase,
-  ) {}
+  ) { }
 
   async execute(loginData: LoginRequest, months: number): Promise<UcInvoice[]> {
     console.log('Iniciando execução de faturas...');
@@ -26,8 +26,9 @@ export class GetAllPdfsUseCase {
       }
       console.log('Token obtido com sucesso.');
     } catch (error) {
-      console.error('Erro ao obter o token:', error.message);
-      return [];
+      throw new HttpException(error.message, error.getStatus());
+
+
     }
 
     let payload;
@@ -48,9 +49,9 @@ export class GetAllPdfsUseCase {
           payload.sub,
           token.token.ne,
         );
-         ucs.ucs = ucs.ucs.filter((uc) => {
-         return uc.status === "LIGADA"
-         })
+        ucs.ucs = ucs.ucs.filter((uc) => {
+          return uc.status === "LIGADA"
+        })
         if (ucs.ucs) {
           console.log(`Total de UCS encontradas: ${ucs.ucs.length}`);
           for (const uc of ucs.ucs) {
@@ -94,24 +95,24 @@ export class GetAllPdfsUseCase {
 
                     while (attempts < maxAttempts) {
                       try {
-                      pdfResponse = await this.externalApiService.downloadPDFS(
-                        uc.uc,
-                        token.token.ne,
-                        payload.sub,
-                        String(protocol.protocoloSalesforce),
-                        fatura.numeroFatura,
-                      );
-                      break;
-                      } catch (error) {
-                      attempts++;
-                      console.error(
-                        `Erro ao tentar baixar o PDF da fatura ${fatura.numeroFatura} (tentativa ${attempts}): ${error.message}`,
-                      );
-                      if (attempts >= maxAttempts) {
-                        console.error(
-                        `Falha ao baixar o PDF da fatura ${fatura.numeroFatura} após ${maxAttempts} tentativas.`,
+                        pdfResponse = await this.externalApiService.downloadPDFS(
+                          uc.uc,
+                          token.token.ne,
+                          payload.sub,
+                          String(protocol.protocoloSalesforce),
+                          fatura.numeroFatura,
                         );
-                      }
+                        break;
+                      } catch (error) {
+                        attempts++;
+                        console.error(
+                          `Erro ao tentar baixar o PDF da fatura ${fatura.numeroFatura} (tentativa ${attempts}): ${error.message}`,
+                        );
+                        if (attempts >= maxAttempts) {
+                          console.error(
+                            `Falha ao baixar o PDF da fatura ${fatura.numeroFatura} após ${maxAttempts} tentativas.`,
+                          );
+                        }
                       }
                     }
 
@@ -153,7 +154,14 @@ export class GetAllPdfsUseCase {
           console.log('Nenhuma UC encontrada.');
         }
       } catch (error) {
-        console.error('Erro ao obter dados das UCS:', error.message);
+        if (error instanceof HttpException) {
+          throw new HttpException(error.message, error.getStatus());
+        }
+
+        throw new HttpException(
+          error.message || 'Erro inesperado ao buscar faturas.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
     } else {
       console.error('Payload do token não contém o sub');
