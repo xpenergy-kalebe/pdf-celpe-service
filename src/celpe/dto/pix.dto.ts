@@ -4,6 +4,7 @@ export interface Pix {
 }
 
 export interface PixList {
+  instalation?: number;
   uc: number;
   pix: Pix;
 }

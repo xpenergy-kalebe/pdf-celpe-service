@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ExternalApiService } from '../external-services/external-celpe.service';
-import { ExecuteLoginUseCase } from './login.usecase';
+import { ExecuteLoginUseCase } from './';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
 import {
   LoginRequest,
   LoginResponse,
-} from '../external-services/dto/login.dto';
-import { UcInvoice, Invoice } from '../dto/invoice.dto';
+} from '../external-services/dto';
+import { UcInvoice, Invoice } from '../dto';
 
 @Injectable()
 export class GetAllPdfsUseCase {
@@ -80,6 +80,7 @@ export class GetAllPdfsUseCase {
                   b.mesReferencia.localeCompare(a.mesReferencia),
                 );
 
+
                 let InvoicesData: Invoice[] = [];
                 for (const fatura of invoices.faturas.slice(0, months)) {
                   try {
@@ -87,14 +88,32 @@ export class GetAllPdfsUseCase {
                       `Baixando fatura: ${fatura.numeroFatura} - ${fatura.mesReferencia}`,
                     );
 
-                    const pdfResponse =
-                      await this.externalApiService.downloadPDFS(
+                    let pdfResponse;
+                    let attempts = 0;
+                    const maxAttempts = 3;
+
+                    while (attempts < maxAttempts) {
+                      try {
+                      pdfResponse = await this.externalApiService.downloadPDFS(
                         uc.uc,
                         token.token.ne,
                         payload.sub,
                         String(protocol.protocoloSalesforce),
                         fatura.numeroFatura,
                       );
+                      break;
+                      } catch (error) {
+                      attempts++;
+                      console.error(
+                        `Erro ao tentar baixar o PDF da fatura ${fatura.numeroFatura} (tentativa ${attempts}): ${error.message}`,
+                      );
+                      if (attempts >= maxAttempts) {
+                        console.error(
+                        `Falha ao baixar o PDF da fatura ${fatura.numeroFatura} após ${maxAttempts} tentativas.`,
+                        );
+                      }
+                      }
+                    }
 
                     if (pdfResponse.fileData) {
                       console.log(
@@ -119,7 +138,8 @@ export class GetAllPdfsUseCase {
                   }
                 }
                 response.push({
-                  uc: Number(uc.contrato),
+                  uc: Number(uc.uc),
+                  instalation: Number(uc.contrato),
                   invoices: InvoicesData,
                 });
               } catch (protocolError) {

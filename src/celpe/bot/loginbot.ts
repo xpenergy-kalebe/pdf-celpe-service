@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-
-import { Page } from 'puppeteer';
-
+import { simulateMouseMovement, typeWithDelay, randomDelay } from 'src/utils';
+import { loginResponsePromise } from './middlewares/responseInterceptor';
 import {
   LoginRequest,
   LoginResponse,
@@ -17,8 +16,6 @@ export class LoginBot {
     const { username, password } = loginData;
     console.log(`[LoginBot] Iniciando o login para o usuário: ${username}`);
 
-
-    // Inicia o navegador com as configurações do chrome-aws-lambda se estiver em ambiente serverless
     let browser;
     try {
       browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
@@ -30,36 +27,6 @@ export class LoginBot {
 
     const page = await browser.newPage();
 
-    // Promessa para capturar a resposta de login
-    const loginResponsePromise = new Promise<LoginResponse>(
-      (resolve, reject) => {
-        page.on('response', async (response) => {
-          const url = response.url();
-          const method = response.request().method();
-
-          if (
-            url.includes('autentica') &&
-            response.status() !== 204 &&
-            response.status() !== 304 &&
-            method !== 'OPTIONS'
-          ) {
-            console.log(`[LoginBot] Resposta recebida da URL: ${url}`);
-            try {
-              const responseBody: LoginResponse = await response.json();
-              console.log(`[LoginBot] Resposta processada com sucesso`);
-              resolve(responseBody);
-            } catch (error) {
-              console.error(
-                `[LoginBot] Erro ao processar a resposta: ${error.message}`,
-              );
-              reject(
-                new Error('Erro ao processar a resposta: ' + error.message),
-              );
-            }
-          }
-        });
-      },
-    );
 
     try {
       console.log(`[LoginBot] Acessando a página de login...`);
@@ -70,51 +37,56 @@ export class LoginBot {
       console.log(`[LoginBot] Página de login carregada`);
 
       console.log(`[LoginBot] Iniciando simulação de movimento do mouse...`);
-      await this.simulateMouseMovement(page);
+      await simulateMouseMovement(page);
       console.log(`[LoginBot] Simulação de movimento concluída`);
 
       console.log(`[LoginBot] Clicando na posição (250, 250)`);
       await page.mouse.click(250, 250);
       console.log(`[LoginBot] Rolando a página...`);
       await page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
-      await this.randomDelay();
+      await randomDelay();
 
       console.log(`[LoginBot] Aguardando seletor do botão de login...`);
       await page.waitForSelector('.btn-login.mat-button', { timeout: 90000 });
       console.log(`[LoginBot] Clicando no botão de login...`);
       await page.click('.btn-login.mat-button');
-      await this.randomDelay();
+      await randomDelay();
 
       console.log(`[LoginBot] Aguardando campo de CPF/CNPJ...`);
       await page.waitForSelector('input[data-placeholder="CPF/CNPJ"]', {
         timeout: 90000,
       });
       console.log(`[LoginBot] Digitando CPF/CNPJ...`);
-      await this.typeWithDelay(
+      await typeWithDelay(
         page,
         'input[data-placeholder="CPF/CNPJ"]',
         username,
       );
-      await this.randomDelay();
+      await randomDelay();
 
       console.log(`[LoginBot] Aguardando campo de Senha...`);
       await page.waitForSelector('input[data-placeholder="Senha"]', {
         timeout: 90000,
       });
       console.log(`[LoginBot] Digitando Senha...`);
-      await this.typeWithDelay(
+      await typeWithDelay(
         page,
         'input[data-placeholder="Senha"]',
         password,
       );
-      await this.randomDelay();
+      await randomDelay();
 
       console.log(`[LoginBot] Clicando no botão Entrar...`);
       await page.click('button[title="Entrar"]');
-      await this.randomDelay();
+      await randomDelay();
 
       console.log(`[LoginBot] Aguardando resposta do login...`);
-      const loginResponse = await loginResponsePromise;
+      const loginResponse = await Promise.race([
+        loginResponsePromise(page),
+        new Promise<LoginResponse>((_, reject) =>
+          setTimeout(() => reject(), 5000)
+        ),
+      ]);
       console.log(`[LoginBot] Login realizado com sucesso`);
 
       await browser.close();
@@ -124,52 +96,8 @@ export class LoginBot {
     } catch (error) {
       console.error(`[LoginBot] Erro no bot de login: ${error.message}`);
       await browser.close();
-      throw new Error('Falha ao realizar o login.');
+      throw new ForbiddenException('Usuário não reconhecido');
     }
   }
 
-  private async simulateMouseMovement(page: Page): Promise<void> {
-    const movements = [
-      { x: 100, y: 100, steps: 5 },
-      { x: 200, y: 200, steps: 7 },
-      { x: 300, y: 300, steps: 10 },
-      { x: 500, y: 500, steps: 12 },
-    ];
-
-    for (const move of movements) {
-      console.log(
-        `[LoginBot] Movendo o mouse para (${move.x}, ${move.y}) em ${move.steps} passos`,
-      );
-      await page.mouse.move(move.x, move.y, { steps: move.steps });
-      await this.randomDelay(200, 400);
-    }
-  }
-
-  private async typeWithDelay(
-    page: Page,
-    selector: string,
-    text: string,
-  ): Promise<void> {
-    console.log(`[LoginBot] Focando no seletor ${selector}`);
-    await page.focus(selector);
-    for (let i = 0; i < text.length; i++) {
-      console.log(`[LoginBot] Digitando "${text[i]}" no seletor ${selector}`);
-      await page.type(selector, text[i], {
-        delay: this.getRandomDelay(50, 100),
-      });
-    }
-  }
-
-  private async randomDelay(
-    min: number = 300,
-    max: number = 700,
-  ): Promise<void> {
-    const delay = this.getRandomDelay(min, max);
-    console.log(`[LoginBot] Aguardando por ${delay}ms`);
-    await new Promise((resolve) => setTimeout(resolve, delay));
-  }
-
-  private getRandomDelay(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
 }

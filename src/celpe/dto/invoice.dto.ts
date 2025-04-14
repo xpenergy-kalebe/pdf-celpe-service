@@ -8,5 +8,6 @@ export interface Invoice {
 
 export interface UcInvoice {
   uc: number;
+  instalation?: number;
   invoices: Invoice[];
 }

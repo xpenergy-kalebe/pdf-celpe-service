@@ -10,6 +10,7 @@ import { ExecuteLoginUseCase, GetUcsUseCase, GetUcUseCase, GetProtocolUseCase, G
 @Module({
   imports: [HttpModule],
   providers: [
+    LoginBot,
     ExternalApiService,
     ApiHelper,
     PayloadHelper,
