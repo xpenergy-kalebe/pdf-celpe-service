@@ -1,14 +1,7 @@
-import {
-  Body,
-  Controller,
-  HttpException,
-  Param,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpException, Param, Post } from '@nestjs/common';
 import { UcResponse, ucsResponse, LoginRequest, LoginResponse, invoicesResponse, ProtocolResponse } from './external-services/dto';
 import { Pix, PixList, UcInvoice } from './dto';
-import { GetAllPdfsUseCase } from './usecases/getAllPdfs.usecase';
-import { GetAllPixUseCase, GetUCPix, GetUcUseCase, GetUcsUseCase, ExecuteLoginUseCase, GetProtocolUseCase, GetInvoicesUseCase, } from './usecases';
+import { GetAllPdfsUseCase, GetAllPixUseCase, GetUCPix, GetUcUseCase, GetUcsUseCase, ExecuteLoginUseCase, GetProtocolUseCase, GetInvoicesUseCase, } from './usecases';
 // import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
 
 @Controller('celpe')

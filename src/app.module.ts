@@ -10,6 +10,5 @@ import { CelpeModule } from './celpe/celpe.module';
 })
 export class AppModule {
   constructor() {
-    console.log('AppModule instanciado');
   }
 }
