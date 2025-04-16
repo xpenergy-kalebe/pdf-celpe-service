@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express, { Request, Response } from 'express';
-
+import cors from 'cors';
 // Instância única do Express e do Nest
 const expressApp = express();
 let nestApp: any;
@@ -18,8 +18,15 @@ async function bootstrap() {
   const adapter = new ExpressAdapter(expressApp);
   nestApp = await NestFactory.create(AppModule, adapter);
 
-  // Define global prefix
-
+  expressApp.use(
+    cors({
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      allowedHeaders: '*',
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+    }),
+  );
   await nestApp.init();
   isInitialized = true;
 
