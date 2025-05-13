@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 import { ExecuteLoginUseCase } from './';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
@@ -30,9 +30,12 @@ export class GetAllPdfsUseCase {
 
 
     }
-
     let payload;
     try {
+      
+      if (token.token.ne === undefined) {
+        throw new ForbiddenException('Token inválido ou não encontrado');
+      }
       payload = PayloadHelper.decode(token.token.ne);
       if (!payload) {
         throw new Error('Falha ao processar o payload do token');

@@ -1,103 +1,155 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-import { simulateMouseMovement, typeWithDelay, randomDelay } from 'src/utils';
+import puppeteer from 'puppeteer-extra';
+import { Page, Browser } from 'puppeteer';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { loginResponsePromise } from './middlewares/responseInterceptor';
-import {
-  LoginRequest,
-  LoginResponse,
-} from '../external-services/dto/login.dto';
+import { LoginRequest, LoginResponse } from '../external-services/dto';
 
 puppeteer.use(StealthPlugin());
 
 @Injectable()
 export class LoginBot {
+  private userAgents = [
+    // Exemplos de user-agents reais
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6 Safari/605.1.15',
+    // ...adicione quantos quiser
+  ];
+
+  // Gera inteiro aleatório entre min e max (inclusive)
+  private randInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // Delay aleatório em milissegundos
+  private async humanDelay(min = 300, max = 1200) {
+    const ms = this.randInt(min, max);
+    await new Promise((r) => setTimeout(r, ms));
+  }
+
+  // Move o mouse de forma “suave” até as coordenadas dadas
+  private async moveMouseHuman(page: Page, x: number, y: number) {
+    const steps = this.randInt(15, 40);
+    await page.mouse.move(x, y, { steps });
+    await this.humanDelay(50, 150);
+  }
+
+  // Digita texto caractere a caractere com atraso humano
+  private async typeHuman(page: Page, selector: string, text: string) {
+    const el = await page.waitForSelector(selector, { visible: true, timeout: 60000 });
+    if (!el) {
+      throw new Error(`Elemento não encontrado: ${selector}`);
+    }
+    const box = await el.boundingBox();
+    if (box) {
+      const cx = box.x + box.width / 2;
+      const cy = box.y + box.height / 2;
+      await this.moveMouseHuman(page, cx, cy);
+      await page.click(selector);
+      for (const char of text) {
+        await page.keyboard.type(char);
+        await this.humanDelay(100, 300);
+      }
+    } else {
+      throw new Error(`Elemento não encontrado: ${selector}`);
+    }
+  }
+
+  private async scrollHuman(page: Page) {
+    const distance = this.randInt(100, 300);
+    await page.evaluate((d) => window.scrollBy(0, d), distance);
+    await this.humanDelay(200, 500);
+  }
+
   async executeLogin(loginData: LoginRequest): Promise<LoginResponse> {
     const { username, password } = loginData;
-    console.log(`[LoginBot] Iniciando o login para o usuário: ${username}`);
+    console.log(`[LoginBot] Iniciando login para ${username}`);
 
-    let browser;
+    // Configura viewport e UA aleatórios
+    const viewport = {
+      width: this.randInt(1200, 1440),
+      height: this.randInt(700, 900),
+      deviceScaleFactor: 1,
+    };
+    const userAgent = this.userAgents[
+      this.randInt(0, this.userAgents.length - 1)
+    ];
+
+    let browser: Browser | null = null;
     try {
-      browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-      console.log(`[LoginBot] Navegador iniciado`);
-    } catch (error) {
-      console.error(`[LoginBot] Erro ao iniciar o navegador: ${error.message}`);
-      throw new Error('Falha ao iniciar o navegador.');
-    }
+      browser = await puppeteer.launch({
+        headless: false,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          `--window-size=${viewport.width},${viewport.height}`,
+        ],
+      });
+      const [page] = await browser.pages();
+      await page.setViewport(viewport);
+      await page.setUserAgent(userAgent);
+      console.log(`[LoginBot] Navegador pronto (UA: ${userAgent})`);
 
-    const page = await browser.newPage();
-
-
-    try {
-      console.log(`[LoginBot] Acessando a página de login...`);
+      await this.humanDelay(800, 1500);
       await page.goto('https://agenciavirtual.neoenergia.com/#/login', {
         waitUntil: 'networkidle2',
         timeout: 90000,
       });
-      console.log(`[LoginBot] Página de login carregada`);
+      console.log('[LoginBot] Página de login carregada');
 
-      console.log(`[LoginBot] Iniciando simulação de movimento do mouse...`);
-      await simulateMouseMovement(page);
-      console.log(`[LoginBot] Simulação de movimento concluída`);
+      // Simula movimentos leves de mouse em torno da tela
+      for (let i = 0; i < this.randInt(2, 4); i++) {
+        const x = this.randInt(100, viewport.width - 100);
+        const y = this.randInt(100, viewport.height - 100);
+        await this.moveMouseHuman(page, x, y);
+      }
 
-      console.log(`[LoginBot] Clicando na posição (250, 250)`);
-      await page.mouse.click(250, 250);
-      console.log(`[LoginBot] Rolando a página...`);
-      await page.evaluate(() => window.scrollBy(0, window.innerHeight / 2));
-      await randomDelay();
+      // Clica no botão inicial de login
+      const loginBtn = await page.waitForSelector('.btn-login.mat-button', { timeout: 90000 });
+      if (loginBtn) {
+        const btnBox = await loginBtn.boundingBox();
+        if (btnBox) {
+          await this.moveMouseHuman(page, btnBox.x + btnBox.width / 2, btnBox.y + btnBox.height / 2);
+          await page.click('.btn-login.mat-button');
+        }
+      } else {
+        throw new Error('Login button not found');
+      }
+      await this.humanDelay();
 
-      console.log(`[LoginBot] Aguardando seletor do botão de login...`);
-      await page.waitForSelector('.btn-login.mat-button', { timeout: 90000 });
-      console.log(`[LoginBot] Clicando no botão de login...`);
-      await page.click('.btn-login.mat-button');
-      await randomDelay();
+      // CPF/CNPJ
+      await this.typeHuman(page, 'input[data-placeholder="CPF/CNPJ"]', username);
+      await this.scrollHuman(page);
 
-      console.log(`[LoginBot] Aguardando campo de CPF/CNPJ...`);
-      await page.waitForSelector('input[data-placeholder="CPF/CNPJ"]', {
-        timeout: 90000,
-      });
-      console.log(`[LoginBot] Digitando CPF/CNPJ...`);
-      await typeWithDelay(
-        page,
-        'input[data-placeholder="CPF/CNPJ"]',
-        username,
-      );
-      await randomDelay();
+      // Senha
+      await this.typeHuman(page, 'input[data-placeholder="Senha"]', password);
+      await this.humanDelay(500, 1000);
 
-      console.log(`[LoginBot] Aguardando campo de Senha...`);
-      await page.waitForSelector('input[data-placeholder="Senha"]', {
-        timeout: 90000,
-      });
-      console.log(`[LoginBot] Digitando Senha...`);
-      await typeWithDelay(
-        page,
-        'input[data-placeholder="Senha"]',
-        password,
-      );
-      await randomDelay();
+      // Botão Entrar
+      const enterBtnSel = 'button[title="Entrar"]';
+      const enterBtn = await page.waitForSelector(enterBtnSel, { timeout: 60000 });
+      if (!enterBtn) {
+        throw new Error('Enter button not found');
+      }
+      const enterBox = await enterBtn.boundingBox();
+      if (enterBox) {
+        await this.moveMouseHuman(page, enterBox.x + enterBox.width / 2, enterBox.y + enterBox.height / 2);
+        await page.click(enterBtnSel);
+      }
 
-      console.log(`[LoginBot] Clicando no botão Entrar...`);
-      await page.click('button[title="Entrar"]');
-      await randomDelay();
-
-      console.log(`[LoginBot] Aguardando resposta do login...`);
+      console.log('[LoginBot] Aguardando resposta...');
       const loginResponse = await Promise.race([
         loginResponsePromise(page),
-        new Promise<LoginResponse>((_, reject) =>
-          setTimeout(() => reject(), 5000)
-        ),
+        new Promise<LoginResponse>((_, reject) => setTimeout(() => reject(new Error('timeout')), 7000)),
       ]);
-      console.log(`[LoginBot] Login realizado com sucesso`);
 
+      console.log('[LoginBot] Login bem-sucedido!');
       await browser.close();
-      console.log(`[LoginBot] Navegador fechado`);
-
       return loginResponse;
-    } catch (error) {
-      console.error(`[LoginBot] Erro no bot de login: ${error.message}`);
-      await browser.close();
+    } catch (err) {
+      console.error(`[LoginBot] Falha no login: ${err.message}`);
+      if (browser) await browser.close();
       throw new ForbiddenException('Usuário não reconhecido');
     }
   }
-
 }
