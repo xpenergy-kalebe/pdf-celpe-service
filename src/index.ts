@@ -31,7 +31,6 @@ async function bootstrap() {
   isInitialized = true;
 
   console.log('✅ NestJS Initialized');
-  printRoutes();
 }
 
 // Inicia o Nest logo no start

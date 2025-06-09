@@ -32,7 +32,7 @@ export class GetAllPdfsUseCase {
     }
     let payload;
     try {
-      
+
       if (token.token.ne === undefined) {
         throw new ForbiddenException('Token inválido ou não encontrado');
       }
@@ -62,89 +62,86 @@ export class GetAllPdfsUseCase {
               try {
                 console.log(`Processando UC: ${uc.uc}`);
 
-                const protocol = await this.externalApiService.getUcProtocol(
-                  uc.uc,
-                  token.token.ne,
-                  payload.sub,
+                // 1) pega protocolo e invoices UMA única vez
+                let protocol = await this.externalApiService.getUcProtocol(
+                  uc.uc, token.token.ne, payload.sub
                 );
                 console.log(
-                  `Protocolo obtido para UC ${uc.uc}: ${protocol.protocoloSalesforce}`,
+                  `Protocolo obtido para UC ${uc.uc}: ${protocol.protocoloSalesforce}`
                 );
 
                 const invoices = await this.externalApiService.getInvoices(
-                  uc.uc,
-                  token.token.ne,
-                  payload.sub,
-                  String(protocol.protocoloSalesforce),
+                  uc.uc, token.token.ne, payload.sub,
+                  String(protocol.protocoloSalesforce)
                 );
                 console.log(
-                  `Faturas encontradas para UC ${uc.uc}: ${invoices.faturas.length}`,
+                  `Faturas encontradas para UC ${uc.uc}: ${invoices.faturas.length}`
                 );
                 invoices.faturas.sort((a, b) =>
-                  b.mesReferencia.localeCompare(a.mesReferencia),
+                  b.mesReferencia.localeCompare(a.mesReferencia)
                 );
 
+                // 2) para CADA fatura, isolamos o retry
+                const invoicesData: Invoice[] = [];
+                const maxAttempts = 3;
 
-                let InvoicesData: Invoice[] = [];
                 for (const fatura of invoices.faturas.slice(0, months)) {
-                  try {
-                    console.log(
-                      `Baixando fatura: ${fatura.numeroFatura} - ${fatura.mesReferencia}`,
-                    );
+                  let attempts = 0;
 
-                    let pdfResponse;
-                    let attempts = 0;
-                    const maxAttempts = 3;
-
-                    while (attempts < maxAttempts) {
-                      try {
-                        pdfResponse = await this.externalApiService.downloadPDFS(
-                          uc.uc,
-                          token.token.ne,
-                          payload.sub,
-                          String(protocol.protocoloSalesforce),
-                          fatura.numeroFatura,
-                        );
-                        break;
-                      } catch (error) {
-                        attempts++;
-                        console.error(
-                          `Erro ao tentar baixar o PDF da fatura ${fatura.numeroFatura} (tentativa ${attempts}): ${error.message}`,
-                        );
-                        if (attempts >= maxAttempts) {
-                          console.error(
-                            `Falha ao baixar o PDF da fatura ${fatura.numeroFatura} após ${maxAttempts} tentativas.`,
-                          );
-                        }
-                      }
-                    }
-
-                    if (pdfResponse.fileData) {
+                  while (attempts < maxAttempts) {
+                    try {
                       console.log(
-                        `Fatura ${fatura.numeroFatura} baixada com sucesso.`,
+                        `Baixando fatura ${fatura.numeroFatura}` +
+                        ` (tentativa ${attempts + 1}/${maxAttempts})`
                       );
-                      InvoicesData.push({
+
+
+                      const pdfResponse = await this.externalApiService.downloadPDFS(
+                        uc.uc, token.token.ne, payload.sub,
+                        String(protocol.protocoloSalesforce),
+                        fatura.numeroFatura
+                      );
+
+                      if (!pdfResponse.fileData) {
+                        throw new Error('PDF não retornado pela API');
+                      }
+
+                      console.log(
+                        `Fatura ${fatura.numeroFatura} baixada com sucesso.`
+                      );
+                      invoicesData.push({
                         fileData: pdfResponse.fileData,
                         fileExtension: pdfResponse.fileExtension,
                         fileName: pdfResponse.fileName,
                         fileSize: Number(pdfResponse.fileSize),
                         month: fatura.mesReferencia,
                       });
-                    } else {
-                      console.log(
-                        `Falha ao baixar fatura ${fatura.numeroFatura}: PDF não encontrado.`,
+
+                      break;
+
+                    } catch (err) {
+                      protocol = await this.externalApiService.getUcProtocol(
+                        uc.uc, token.token.ne, payload.sub
                       );
+                      attempts++;
+                      console.error(
+                        `Erro ao baixar ${fatura.numeroFatura}` +
+                        ` (tentativa ${attempts}/${maxAttempts}): ${err.message}`
+                      );
+                      if (attempts === maxAttempts) {
+                        console.error(
+                          `Não foi possível baixar ${fatura.numeroFatura}` +
+                          ` após ${maxAttempts} tentativas. Pulando.`
+                        );
+                      }
                     }
-                  } catch (pdfError) {
-                    console.error(
-                      `Erro ao tentar baixar o PDF da fatura ${fatura.numeroFatura}: ${pdfError.message}`,
-                    );
                   }
                 }
+
                 response.push({
                   uc: Number(uc.uc),
                   instalation: Number(uc.contrato),
-                  invoices: InvoicesData,
+                  invoices: invoicesData,
                 });
               } catch (protocolError) {
                 console.error(

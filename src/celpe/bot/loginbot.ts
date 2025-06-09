@@ -4,37 +4,31 @@ import { Page, Browser } from 'puppeteer';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { loginResponsePromise } from './middlewares/responseInterceptor';
 import { LoginRequest, LoginResponse } from '../external-services/dto';
-
+import { storePrint } from 'src/services/firestore';
 puppeteer.use(StealthPlugin());
 
 @Injectable()
 export class LoginBot {
   private userAgents = [
-    // Exemplos de user-agents reais
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6 Safari/605.1.15',
-    // ...adicione quantos quiser
   ];
 
-  // Gera inteiro aleatório entre min e max (inclusive)
   private randInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  // Delay aleatório em milissegundos
   private async humanDelay(min = 300, max = 1200) {
     const ms = this.randInt(min, max);
     await new Promise((r) => setTimeout(r, ms));
   }
 
-  // Move o mouse de forma “suave” até as coordenadas dadas
   private async moveMouseHuman(page: Page, x: number, y: number) {
     const steps = this.randInt(15, 40);
     await page.mouse.move(x, y, { steps });
     await this.humanDelay(50, 150);
   }
 
-  // Digita texto caractere a caractere com atraso humano
   private async typeHuman(page: Page, selector: string, text: string) {
     const el = await page.waitForSelector(selector, { visible: true, timeout: 60000 });
     if (!el) {
@@ -65,7 +59,6 @@ export class LoginBot {
     const { username, password } = loginData;
     console.log(`[LoginBot] Iniciando login para ${username}`);
 
-    // Configura viewport e UA aleatórios
     const viewport = {
       width: this.randInt(1200, 1440),
       height: this.randInt(700, 900),
@@ -76,16 +69,22 @@ export class LoginBot {
     ];
 
     let browser: Browser | null = null;
+    browser = await puppeteer.launch({
+      headless: false,
+      args: [
+        '--no-sandbox',
+        '--proxy-server=198.23.239.134:6540',
+        '--disable-setuid-sandbox',
+        `--window-size=${viewport.width},${viewport.height}`,
+      ],
+    });
+
+    const [page] = await browser.pages();
+    await page.authenticate({
+      username: 'vkzfpggc',
+      password: '51380i8274y2'
+    });
     try {
-      browser = await puppeteer.launch({
-        headless: false,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          `--window-size=${viewport.width},${viewport.height}`,
-        ],
-      });
-      const [page] = await browser.pages();
       await page.setViewport(viewport);
       await page.setUserAgent(userAgent);
       console.log(`[LoginBot] Navegador pronto (UA: ${userAgent})`);
@@ -140,7 +139,7 @@ export class LoginBot {
       console.log('[LoginBot] Aguardando resposta...');
       const loginResponse = await Promise.race([
         loginResponsePromise(page),
-        new Promise<LoginResponse>((_, reject) => setTimeout(() => reject(new Error('timeout')), 7000)),
+        new Promise<LoginResponse>((_, reject) => setTimeout(() => reject(new Error('timeout')), 16000)),
       ]);
 
       console.log('[LoginBot] Login bem-sucedido!');
@@ -148,6 +147,15 @@ export class LoginBot {
       return loginResponse;
     } catch (err) {
       console.error(`[LoginBot] Falha no login: ${err.message}`);
+      if (browser) {
+        try {
+          const screenshot = await page.screenshot();
+          await storePrint(screenshot);
+          console.log('[LoginBot] Print armazenado com sucesso');
+        } catch (screenshotError) {
+          console.error(`[LoginBot] Erro ao armazenar print: ${screenshotError.message}`);
+        }
+      }
       if (browser) await browser.close();
       throw new ForbiddenException('Usuário não reconhecido');
     }
