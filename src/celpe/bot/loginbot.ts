@@ -70,10 +70,10 @@ export class LoginBot {
 
     let browser: Browser | null = null;
     browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: [
         '--no-sandbox',
-        '--proxy-server=198.23.239.134:6540',
+        '--proxy-server=23.95.150.145:6114',
         '--disable-setuid-sandbox',
         `--window-size=${viewport.width},${viewport.height}`,
       ],
@@ -81,8 +81,8 @@ export class LoginBot {
 
     const [page] = await browser.pages();
     await page.authenticate({
-      username: 'vkzfpggc',
-      password: '51380i8274y2'
+      username: 'ulxbqhep',
+      password: 'jhpybfgjw7tm'
     });
     try {
       await page.setViewport(viewport);
