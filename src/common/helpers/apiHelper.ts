@@ -2,15 +2,15 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+// import { HttpsProxyAgent } from 'https-proxy-agent';
 
 @Injectable()
 export class ApiHelper {
-  private readonly proxyAgent: HttpsProxyAgent<string>;
+  // private readonly proxyAgent: HttpsProxyAgent<string>;
 
   constructor(private readonly httpService: HttpService) {
     const proxyUrl = 'http://vkzfpggc:51380i8274y2@198.23.239.134:6540';
-    this.proxyAgent = new HttpsProxyAgent<string>(proxyUrl);
+    // this.proxyAgent = new HttpsProxyAgent<string>(proxyUrl);
   }
 
   private async request<T>(
@@ -35,8 +35,8 @@ export class ApiHelper {
         data,
         headers,
         // Injeta o agent para HTTP e HTTPS
-        httpAgent: this.proxyAgent,
-        httpsAgent: this.proxyAgent,
+        // httpAgent: this.proxyAgent,
+        // httpsAgent: this.proxyAgent,
         // Desabilita o handler interno de proxy do axios
         proxy: false,
       };

@@ -30,7 +30,10 @@ export class LoginBot {
   }
 
   private async typeHuman(page: Page, selector: string, text: string) {
-    const el = await page.waitForSelector(selector, { visible: true, timeout: 60000 });
+    const el = await page.waitForSelector(selector, {
+      visible: true,
+      timeout: 60000,
+    });
     if (!el) {
       throw new Error(`Elemento não encontrado: ${selector}`);
     }
@@ -64,13 +67,12 @@ export class LoginBot {
       height: this.randInt(700, 900),
       deviceScaleFactor: 1,
     };
-    const userAgent = this.userAgents[
-      this.randInt(0, this.userAgents.length - 1)
-    ];
+    const userAgent =
+      this.userAgents[this.randInt(0, this.userAgents.length - 1)];
 
     let browser: Browser | null = null;
     browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: [
         '--no-sandbox',
         '--proxy-server=23.95.150.145:6114',
@@ -81,8 +83,8 @@ export class LoginBot {
 
     const [page] = await browser.pages();
     await page.authenticate({
-      username: 'ulxbqhep',
-      password: 'jhpybfgjw7tm'
+      username: 'bixnmzqq',
+      password: '2rndb7684pdq',
     });
     try {
       await page.setViewport(viewport);
@@ -104,20 +106,45 @@ export class LoginBot {
       }
 
       // Clica no botão inicial de login
-      const loginBtn = await page.waitForSelector('.btn-login.mat-button', { timeout: 90000 });
-      if (loginBtn) {
-        const btnBox = await loginBtn.boundingBox();
-        if (btnBox) {
-          await this.moveMouseHuman(page, btnBox.x + btnBox.width / 2, btnBox.y + btnBox.height / 2);
-          await page.click('.btn-login.mat-button');
+      async function clickWithRetry(page: Page, selector: string, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+          try {
+            const loginBtn = await page.waitForSelector(selector, {
+              timeout: 45000,
+              visible: true,
+            });
+            if (!loginBtn) throw new Error('Botão não encontrado no DOM');
+
+            const btnBox = await loginBtn.boundingBox();
+            if (!btnBox) throw new Error('BoundingBox inválido');
+
+            await this.moveMouseHuman(
+              page,
+              btnBox.x + btnBox.width / 2,
+              btnBox.y + btnBox.height / 2,
+            );
+            await loginBtn.click({ delay: 100 });
+            await this.humanDelay();
+            return;
+          } catch (err) {
+            console.warn(`Tentativa ${i + 1} falhou:`, err);
+            if (i === retries - 1) throw err;
+            await page.waitForTimeout(2000);
+          }
         }
-      } else {
-        throw new Error('Login button not found');
       }
-      await this.humanDelay();
+      await clickWithRetry.call(
+        this,
+        page,
+        '.mat-focus-indicator.mat-flat-button.mat-button-base.mat-primary',
+      );
 
       // CPF/CNPJ
-      await this.typeHuman(page, 'input[data-placeholder="CPF/CNPJ"]', username);
+      await this.typeHuman(
+        page,
+        'input[data-placeholder="CPF/CNPJ"]',
+        username,
+      );
       await this.scrollHuman(page);
 
       // Senha
@@ -126,20 +153,28 @@ export class LoginBot {
 
       // Botão Entrar
       const enterBtnSel = 'button[title="Entrar"]';
-      const enterBtn = await page.waitForSelector(enterBtnSel, { timeout: 60000 });
+      const enterBtn = await page.waitForSelector(enterBtnSel, {
+        timeout: 60000,
+      });
       if (!enterBtn) {
         throw new Error('Enter button not found');
       }
       const enterBox = await enterBtn.boundingBox();
       if (enterBox) {
-        await this.moveMouseHuman(page, enterBox.x + enterBox.width / 2, enterBox.y + enterBox.height / 2);
+        await this.moveMouseHuman(
+          page,
+          enterBox.x + enterBox.width / 2,
+          enterBox.y + enterBox.height / 2,
+        );
         await page.click(enterBtnSel);
       }
 
       console.log('[LoginBot] Aguardando resposta...');
       const loginResponse = await Promise.race([
         loginResponsePromise(page),
-        new Promise<LoginResponse>((_, reject) => setTimeout(() => reject(new Error('timeout')), 16000)),
+        new Promise<LoginResponse>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 16000),
+        ),
       ]);
 
       console.log('[LoginBot] Login bem-sucedido!');
@@ -153,7 +188,9 @@ export class LoginBot {
           await storePrint(screenshot);
           console.log('[LoginBot] Print armazenado com sucesso');
         } catch (screenshotError) {
-          console.error(`[LoginBot] Erro ao armazenar print: ${screenshotError.message}`);
+          console.error(
+            `[LoginBot] Erro ao armazenar print: ${screenshotError.message}`,
+          );
         }
       }
       if (browser) await browser.close();
