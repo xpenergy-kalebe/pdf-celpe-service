@@ -72,7 +72,7 @@ export class LoginBot {
 
     let browser: Browser | null = null;
     browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: [
         '--no-sandbox',
         '--proxy-server=23.95.150.145:6114',
