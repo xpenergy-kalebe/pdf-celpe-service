@@ -42,7 +42,7 @@ export class DownloadPdfsUseCase {
     if (payload.sub) {
       try {
         console.log('Buscando UCS associadas ao usuário...');
-        let ucs = await this.externalApiService.getUcs(
+        const ucs = await this.externalApiService.getUcs(
           payload.sub,
           token.token.ne,
         );

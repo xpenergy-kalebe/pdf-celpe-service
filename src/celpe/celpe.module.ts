@@ -5,7 +5,16 @@ import { ApiHelper } from 'src/common/helpers/apiHelper';
 import { LoginBot } from './bot/loginbot';
 import { CelpeController } from './celpe.controller';
 import { PayloadHelper } from 'src/common/helpers/jwtHelper';
-import { ExecuteLoginUseCase, GetUcsUseCase, GetUcUseCase, GetProtocolUseCase, GetInvoicesUseCase, GetAllPdfsUseCase, GetUCPix, GetAllPixUseCase } from './usecases';
+import {
+  ExecuteLoginUseCase,
+  GetUcsUseCase,
+  GetUcUseCase,
+  GetProtocolUseCase,
+  GetInvoicesUseCase,
+  GetAllPdfsUseCase,
+  GetUCPix,
+  GetAllPixUseCase,
+} from './usecases';
 // import { DownloadPdfsUseCase } from './usecases/downloadPdfs.usecase';
 @Module({
   imports: [HttpModule],

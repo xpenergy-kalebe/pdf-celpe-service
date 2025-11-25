@@ -44,7 +44,6 @@ export async function main(req: Request, res: Response) {
   console.log('➡️  Método:', req.method);
   console.log('➡️  URL:', req.url);
 
-
   try {
     await ready;
     expressApp(req, res, () => {

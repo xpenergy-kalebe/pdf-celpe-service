@@ -33,7 +33,7 @@ export class GetAllPixUseCase {
         const ucsFiltered = ucs.ucs.filter((uc) => {
           return uc.status === 'LIGADA';
         });
-        let response: PixList[] = [];
+        const response: PixList[] = [];
         for (const uc of ucsFiltered) {
           try {
             let protocol;

@@ -75,7 +75,7 @@ export class LoginBot {
       headless: true,
       args: [
         '--no-sandbox',
-        '--proxy-server=23.95.150.145:6114',
+        '--proxy-server=142.111.48.253:7030',
         '--disable-setuid-sandbox',
         `--window-size=${viewport.width},${viewport.height}`,
       ],
@@ -83,8 +83,8 @@ export class LoginBot {
 
     const [page] = await browser.pages();
     await page.authenticate({
-      username: 'bixnmzqq',
-      password: '2rndb7684pdq',
+      username: 'bvadawmd',
+      password: 'z3qduf81g9oy',
     });
     try {
       await page.setViewport(viewport);
@@ -106,6 +106,10 @@ export class LoginBot {
       }
 
       // Clica no botão inicial de login
+      await page.waitForSelector(
+        'circle.ng-star-inserted',
+        { hidden: true, timeout: 60000 }, // espera até 60s o spinner sumir
+      );
       async function clickWithRetry(page: Page, selector: string, retries = 3) {
         for (let i = 0; i < retries; i++) {
           try {
@@ -178,7 +182,7 @@ export class LoginBot {
       ]);
 
       console.log('[LoginBot] Login bem-sucedido!');
-      await browser.close();
+      // await browser.close();
       return loginResponse;
     } catch (err) {
       console.error(`[LoginBot] Falha no login: ${err.message}`);
@@ -193,7 +197,7 @@ export class LoginBot {
           );
         }
       }
-      if (browser) await browser.close();
+      // if (browser) await browser.close();
       throw new ForbiddenException('Usuário não reconhecido');
     }
   }

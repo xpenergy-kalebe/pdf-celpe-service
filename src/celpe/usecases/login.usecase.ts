@@ -1,8 +1,9 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import {
-  LoginRequest,
-  LoginResponse,
-} from '../external-services/dto';
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { LoginRequest, LoginResponse } from '../external-services/dto';
 import { ExternalApiService } from '../external-services/external-celpe.service';
 @Injectable()
 export class ExecuteLoginUseCase {
@@ -14,7 +15,9 @@ export class ExecuteLoginUseCase {
       return loginResponse;
     } catch (error) {
       console.error('Erro no processo de login:', error.message);
-      throw new NotFoundException('Falha no login. Verifique suas credenciais.');
+      throw new NotFoundException(
+        'Falha no login. Verifique suas credenciais.',
+      );
     }
   }
 }

@@ -8,8 +8,8 @@ async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 function getRandomDelay(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 export async function simulateMouseMovement(page: Page) {
   const moves = [

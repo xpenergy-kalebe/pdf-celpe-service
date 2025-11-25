@@ -9,7 +9,7 @@ export class GetUcUseCase {
   constructor(
     private readonly externalApiService: ExternalApiService,
     private readonly login: ExecuteLoginUseCase,
-  ) { }
+  ) {}
 
   async execute(
     loginData: LoginRequest,
