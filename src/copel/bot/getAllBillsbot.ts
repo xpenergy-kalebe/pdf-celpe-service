@@ -64,7 +64,7 @@ export class getAllBillsBot {
     const userAgent =
       this.userAgents[this.randInt(0, this.userAgents.length - 1)];
 
-    const browser: Browser = await chromium.launch({ headless: false });
+    const browser: Browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
       viewport,
       userAgent,

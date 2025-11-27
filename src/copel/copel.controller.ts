@@ -21,6 +21,8 @@ export class CopelController {
       throw new HttpException(message, status);
     }
   }
+
+  @Post('invoices/:months')
   async getPdfs(
     @Param('months') months: number,
     @Body() loginData: loginRequest,
